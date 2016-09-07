@@ -1,6 +1,16 @@
 <% if jobs.present? %>
   <h1><%= description %></h1>
 
+  <%= erb(File.read(Resque::JobHistoryServer.erb_path("_job_pagination.erb")),
+          locals: { class_name:          @job_class_name,
+                    page_num:            @finished_page_num,
+                    page_size:           @finished_page_size,
+                    total_jobs:          Resque::Plugins::JobHistory::JobViewer.num_finished_jobs(@job_class_name),
+                    primary_type:        "finished",
+                    secondary_type:      "running",
+                    secondary_page_num:  @running_page_num,
+                    secondary_page_size: @running_page_size }) %>
+
   <table>
     <tr>
       <th>Started</th>
@@ -23,7 +33,7 @@
           <% end %>
         </td>
         <td>
-          <pre><code><%= "".html_safe + Resque::Plugins::JobHistory::ClassMethods.decode_args(job_details[:args]).to_yaml %></code></pre>
+          <pre><code><%= "".html_safe + Resque::Plugins::JobHistory.decode_args(job_details[:args]).to_yaml %></code></pre>
         </td>
         <td>
           <%= job_details[:error] %>
@@ -31,4 +41,14 @@
       </tr>
     <% end %>
   </table>
+
+  <%= erb(File.read(Resque::JobHistoryServer.erb_path("_job_pagination.erb")),
+          locals: { class_name:          @job_class_name,
+                    page_num:            @finished_page_num,
+                    page_size:           @finished_page_size,
+                    total_jobs:          Resque::Plugins::JobHistory::JobViewer.num_finished_jobs(@job_class_name),
+                    primary_type:        "finished",
+                    secondary_type:      "running",
+                    secondary_page_num:  @running_page_num,
+                    secondary_page_size: @running_page_size }) %>
 <% end %>

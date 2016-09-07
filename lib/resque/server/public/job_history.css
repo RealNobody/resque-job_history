@@ -1,0 +1,29 @@
+.job_history_pagination_block {
+    width:           100%;
+    display:         flex;
+    justify-content: space-between;
+    margin-bottom:   5px;
+}
+
+.job_history_first_page {
+    margin-right: 5px;
+}
+
+.job_history_prev_page {
+    margin-right: 5px;
+    margin-left:  5px;
+}
+
+.job_history_page {
+    margin-right: 5px;
+    margin-left:  5px;
+}
+
+.job_history_next_page {
+    margin-right: 5px;
+    margin-left:  5px;
+}
+
+.job_history_last_page {
+    margin-left: 5px;
+}

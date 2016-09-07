@@ -4,7 +4,7 @@
   <%= @job_class_name %>
 </h1>
 
-<% job_details = Resque::Plugins::JobHistory::JobViewer::ClassMethods.job_details(@job_id, @job_class_name) %>
+<% job_details = Resque::Plugins::JobHistory::JobViewer.job_details(@job_id, @job_class_name) %>
 
 <a href="<%= u("job history") %>">
   Job History
@@ -40,7 +40,7 @@
       Params
     </td>
     <td>
-      <pre><code><%= "".html_safe + Resque::Plugins::JobHistory::ClassMethods.decode_args(job_details[:args]).to_yaml %></code></pre>
+      <pre><code><%= "".html_safe + Resque::Plugins::JobHistory.decode_args(job_details[:args]).to_yaml %></code></pre>
     </td>
   </tr>
   <% if job_details[:error].present? %>
@@ -67,7 +67,7 @@
   <input type="submit" name="" value="Delete this run"/>
 </form>
 
-<% if Resque::Plugins::JobHistory::ClassMethods.class_name_valid?(@job_class_name) %>
+<% if Resque::Plugins::JobHistory.class_name_valid?(@job_class_name) %>
   <form method="POST" action="retry_job?<%= { class_name: @job_class_name, job_id: @job_id }.to_param %>">
     <input type="submit" name="" value="Retry this run"/>
   </form>

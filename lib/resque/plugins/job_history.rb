@@ -24,144 +24,108 @@ module Resque
       #     end_time
       #     error
       MAX_JOB_HISTORY = 200
+      PAGE_SIZE       = 25
       NAME_SPACE      = "Resque::Plugins::ResqueJobHistory".freeze
 
-      # class methods added to the included class.
-      module ClassMethods
-        def redis
-          @redis ||= Redis::Namespace.new(NAME_SPACE, redis: Resque.redis)
-        end
+      def redis
+        @redis ||= Redis::Namespace.new(NAME_SPACE, redis: Resque.redis)
+      end
 
-        module_function :redis
+      module_function :redis
 
-        def job_history_key
-          "job_history"
-        end
+      def job_history_key
+        "job_history"
+      end
 
-        module_function :job_history_key
+      module_function :job_history_key
 
-        def job_history_base_key(class_name)
-          class_name ||= name
-          "#{job_history_key}.#{class_name}"
-        end
+      def job_history_base_key(class_name)
+        class_name ||= name
+        "#{job_history_key}.#{class_name}"
+      end
 
-        module_function :job_history_base_key
+      module_function :job_history_base_key
 
-        def job_history_job_key(job_id, class_name)
-          "#{job_history_base_key(class_name)}.#{job_id}"
-        end
+      def job_history_job_key(job_id, class_name)
+        "#{job_history_base_key(class_name)}.#{job_id}"
+      end
 
-        module_function :job_history_job_key
+      module_function :job_history_job_key
 
-        def max_jobs_running_key(class_name)
-          "#{job_history_base_key(class_name)}.max_jobs"
-        end
+      def max_jobs_running_key(class_name)
+        "#{job_history_base_key(class_name)}.max_jobs"
+      end
 
-        module_function :max_jobs_running_key
+      module_function :max_jobs_running_key
 
-        def total_finished_jobs_key(class_name)
-          "#{job_history_base_key(class_name)}.total_finished_jobs"
-        end
+      def total_finished_jobs_key(class_name)
+        "#{job_history_base_key(class_name)}.total_finished_jobs"
+      end
 
-        module_function :total_finished_jobs_key
+      module_function :total_finished_jobs_key
 
-        def job_history_running_job_list_key(class_name)
-          "#{job_history_base_key(class_name)}.running_jobs"
-        end
+      def job_history_running_job_list_key(class_name)
+        "#{job_history_base_key(class_name)}.running_jobs"
+      end
 
-        module_function :job_history_running_job_list_key
+      module_function :job_history_running_job_list_key
 
-        def job_history_finished_job_list_key(class_name)
-          "#{job_history_base_key(class_name)}.finished_jobs"
-        end
+      def job_history_finished_job_list_key(class_name)
+        "#{job_history_base_key(class_name)}.finished_jobs"
+      end
 
-        module_function :job_history_finished_job_list_key
+      module_function :job_history_finished_job_list_key
 
-        def encode_args(*args)
-          Resque.encode(args)
-        end
+      def encode_args(*args)
+        Resque.encode(args)
+      end
 
-        module_function :encode_args
+      module_function :encode_args
 
-        def decode_args(args_string)
-          Resque.decode(args_string)
-        end
+      def decode_args(args_string)
+        Resque.decode(args_string)
+      end
 
-        module_function :decode_args
+      module_function :decode_args
 
-        def cancel_job(job_id, class_name)
-          redis.hset(job_history_job_key(job_id, class_name),
-                     "error",
-                     "Unknown - Job failed to signal ending after the configured purge time or "\
+      def cancel_job(job_id, class_name)
+        redis.hset(job_history_job_key(job_id, class_name),
+                   "error",
+                   "Unknown - Job failed to signal ending after the configured purge time or "\
                        "was canceled manually.")
 
-          job_finished(job_id, class_name)
-        end
-
-        module_function :cancel_job
-
-        def job_finished(job_id, class_name)
-          redis.lrem job_history_running_job_list_key(class_name), 0, job_id
-
-          record_job_finished(job_id, class_name)
-          num_jobs = add_to_finished_list(job_id, class_name)
-
-          delete_old_jobs(num_jobs, class_name)
-        end
-
-        module_function :job_finished
-
-        def class_name_valid?(class_name)
-          class_name.constantize
-          true
-        rescue StandardError
-          false
-        end
-
-        module_function :class_name_valid?
-
-        def retry_job(job_id, class_name)
-          job = Resque::Plugins::JobHistory::JobViewer::ClassMethods.job_details(job_id, class_name)
-
-          Resque.enqueue class_name, *decode_args(job[:args])
-        end
-
-        module_function :retry_job
-
-        private
-
-        def record_job_finished(job_id, class_name)
-          redis.hset(job_history_job_key(job_id, class_name), "end_time", Time.now.utc.to_s)
-          redis.incr(total_finished_jobs_key(class_name))
-        end
-
-        module_function :record_job_finished
-
-        def add_to_finished_list(job_id, class_name)
-          redis.lpush(job_history_finished_job_list_key(class_name), job_id)
-        end
-
-        module_function :add_to_finished_list
-
-        def delete_old_jobs(num_jobs, class_name)
-          while num_jobs > class_history_len(class_name)
-            Resque::Plugins::JobHistory::Cleaner::ClassMethods.purge_job(redis.
-                rpop(job_history_finished_job_list_key(class_name)), class_name)
-
-            num_jobs -= 1
-          end
-        end
-
-        module_function :delete_old_jobs
-
-        def class_history_len(class_name)
-          class_name.constantize.job_history_len
-        rescue StandardError
-          MAX_JOB_HISTORY
-        end
-
-        module_function :class_history_len
+        job_finished(job_id, class_name)
       end
+
+      module_function :cancel_job
+
+      def job_finished(job_id, class_name)
+        redis.lrem job_history_running_job_list_key(class_name), 0, job_id
+
+        record_job_finished(job_id, class_name)
+        num_jobs = add_to_finished_list(job_id, class_name)
+
+        delete_old_jobs(num_jobs, class_name)
+      end
+
+      module_function :job_finished
+
+      def class_name_valid?(class_name)
+        class_name.constantize
+        true
+      rescue StandardError
+        false
+      end
+
+      module_function :class_name_valid?
+
+      def retry_job(job_id, class_name)
+        job = Resque::Plugins::JobHistory::JobViewer.job_details(job_id, class_name)
+
+        Resque.enqueue class_name, *decode_args(job[:args])
+      end
+
+      module_function :retry_job
 
       def job_history_len
         @job_history_len || MAX_JOB_HISTORY
@@ -187,11 +151,11 @@ module Resque
       private
 
       def history_klass
-        Resque::Plugins::JobHistory::ClassMethods
+        Resque::Plugins::JobHistory
       end
 
       def cleaner_klass
-        Resque::Plugins::JobHistory::Cleaner::ClassMethods
+        Resque::Plugins::JobHistory::Cleaner
       end
 
       attr_reader :job_history_run_id
@@ -231,13 +195,41 @@ module Resque
         history_klass.max_jobs_running_key(self.class.name)
       end
 
-      def total_finished_key
-        history_klass.total_finished_jobs_key(self.class.name)
-      end
-
       def purge_age
         (@purge_jobs_after || 24.hours).ago
       end
+
+      def record_job_finished(job_id, class_name)
+        redis.hset(job_history_job_key(job_id, class_name), "end_time", Time.now.utc.to_s)
+        redis.incr(total_finished_jobs_key(class_name))
+      end
+
+      module_function :record_job_finished
+
+      def add_to_finished_list(job_id, class_name)
+        redis.lpush(job_history_finished_job_list_key(class_name), job_id)
+      end
+
+      module_function :add_to_finished_list
+
+      def delete_old_jobs(num_jobs, class_name)
+        while num_jobs > class_history_len(class_name)
+          Resque::Plugins::JobHistory::Cleaner.purge_job(redis.
+              rpop(job_history_finished_job_list_key(class_name)), class_name)
+
+          num_jobs -= 1
+        end
+      end
+
+      module_function :delete_old_jobs
+
+      def class_history_len(class_name)
+        class_name.constantize.job_history_len
+      rescue StandardError
+        MAX_JOB_HISTORY
+      end
+
+      module_function :class_history_len
     end
   end
 end
