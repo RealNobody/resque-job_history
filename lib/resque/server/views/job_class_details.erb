@@ -1,0 +1,76 @@
+<link href="job_history/public/job_history.css" media="screen" rel="stylesheet" type="text/css">
+
+<h1><%= @job_class_name %></h1>
+
+<% class_info = Resque::Plugins::JobHistory::JobViewer::ClassMethods.job_class_summary(@job_class_name) %>
+
+<a href="<%= u("job history") %>">
+  Job History
+</a>
+
+<table>
+  <tr>
+    <td>
+      Running jobs
+    </td>
+    <td>
+      <%= class_info[:running_jobs].to_i %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Total jobs run
+    </td>
+    <td>
+      <%= class_info[:total_finished_jobs].to_i %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Total jobs in history
+    </td>
+    <td>
+      <%= class_info[:finished_jobs].to_i %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Maximum number of consecutive jobs seen
+    </td>
+    <td>
+      <%= class_info[:max_running_jobs].to_i %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Is still valid job
+    </td>
+    <td>
+      <%= Resque::Plugins::JobHistory::ClassMethods.class_name_valid?(class_info[:class_name]) %>
+    </td>
+  </tr>
+</table>
+
+<%=
+  erb(
+      File.read(Resque::JobHistoryServer.erb_path("_jobs_list.erb")),
+      locals: { jobs:        Resque::Plugins::JobHistory::JobViewer::ClassMethods.running_jobs(@job_class_name),
+                description: "Running Jobs",
+                class_name:  @job_class_name }
+  )
+%>
+
+<%=
+  erb(
+      File.read(Resque::JobHistoryServer.erb_path("_jobs_list.erb")),
+      locals: { jobs:        Resque::Plugins::JobHistory::JobViewer::ClassMethods.finished_jobs(@job_class_name),
+                description: "Finished Jobs",
+                class_name:  @job_class_name }
+  )
+%>
+
+<br/>
+
+<form method="POST" action="purge_class?<%= { class_name: @job_class_name }.to_param %>">
+  <input type="submit" name="" value="Purge all histories for <%= @job_class_name %>"/>
+</form>

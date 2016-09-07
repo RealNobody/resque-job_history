@@ -1,0 +1,74 @@
+<link href="job_history/public/job_history.css" media="screen" rel="stylesheet" type="text/css">
+
+<h1>
+  <%= @job_class_name %>
+</h1>
+
+<% job_details = Resque::Plugins::JobHistory::JobViewer::ClassMethods.job_details(@job_id, @job_class_name) %>
+
+<a href="<%= u("job history") %>">
+  Job History
+</a>
+|
+<a href="job_class_details?<%= { class_name: @job_class_name }.to_param %>">
+  <%= @job_class_name %>
+</a>
+
+<table>
+  <tr>
+    <td>
+      Started
+    </td>
+    <td>
+      <%= time_ago_in_words(job_details[:start_time]) %> ago
+      (<%= job_details[:start_time] %>)
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Duration
+    </td>
+    <td>
+      <%= distance_of_time_in_words(job_details[:start_time], (job_details[:end_time] || Time.now)) %>
+      <% if job_details[:end_time] %>
+        (<%= job_details[:end_time] %>)
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Params
+    </td>
+    <td>
+      <pre><code><%= "".html_safe + Resque::Plugins::JobHistory::ClassMethods.decode_args(job_details[:args]).to_yaml %></code></pre>
+    </td>
+  </tr>
+  <% if job_details[:error].present? %>
+    <tr>
+      <td>
+        Error
+      </td>
+      <td>
+        <%= job_details[:error] %>
+      </td>
+    </tr>
+  <% end %>
+</table>
+
+<br/>
+
+<% if job_details[:end_time].blank? %>
+  <form method="POST" action="cancel_job?<%= { class_name: @job_class_name, job_id: @job_id }.to_param %>">
+    <input type="submit" name="" value="Job is not running - Cancel job"/>
+  </form>
+<% end %>
+
+<form method="POST" action="delete_job?<%= { class_name: @job_class_name, job_id: @job_id }.to_param %>">
+  <input type="submit" name="" value="Delete this run"/>
+</form>
+
+<% if Resque::Plugins::JobHistory::ClassMethods.class_name_valid?(@job_class_name) %>
+  <form method="POST" action="retry_job?<%= { class_name: @job_class_name, job_id: @job_id }.to_param %>">
+    <input type="submit" name="" value="Retry this run"/>
+  </form>
+<% end %>
