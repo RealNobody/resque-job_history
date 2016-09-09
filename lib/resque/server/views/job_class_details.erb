@@ -2,7 +2,9 @@
 
 <h1><%= @job_class_name %></h1>
 
-<% class_info = Resque::Plugins::JobHistory::JobViewer.job_class_summary(@job_class_name) %>
+<% job_list = Resque::Plugins::JobHistory::JobList.new %>
+<% history = Resque::Plugins::JobHistory::HistoryBase.new(@job_class_name) %>
+<% class_info = job_list.job_class_summary(@job_class_name) %>
 
 <a href="<%= u("job history") %>">
   Job History
@@ -20,6 +22,14 @@
   <tr>
     <td>
       Total jobs run
+    </td>
+    <td>
+      <%= class_info[:total_run_jobs].to_i %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Total jobs finished
     </td>
     <td>
       <%= class_info[:total_finished_jobs].to_i %>
@@ -46,7 +56,7 @@
       Is still valid job
     </td>
     <td>
-      <%= Resque::Plugins::JobHistory.class_name_valid?(class_info[:class_name]) %>
+      <%= class_info[:class_name_valid] %>
     </td>
   </tr>
 </table>
@@ -54,13 +64,11 @@
 <%=
   erb(
       File.read(Resque::JobHistoryServer.erb_path("_jobs_list.erb")),
-      locals: { jobs:                Resque::Plugins::JobHistory::JobViewer.
-          running_jobs(@job_class_name, @running_page_num, @running_page_size),
+      locals: { history_list:        history.running_list,
                 description:         "Running Jobs",
                 class_name:          @job_class_name,
                 page_num:            @running_page_num,
                 page_size:           @running_page_size,
-                total_jobs:          Resque::Plugins::JobHistory::JobViewer.num_running_jobs(@job_class_name),
                 primary_type:        "running",
                 secondary_type:      "finished",
                 secondary_page_num:  @finished_page_num,
@@ -71,13 +79,11 @@
 <%=
   erb(
       File.read(Resque::JobHistoryServer.erb_path("_jobs_list.erb")),
-      locals: { jobs:                Resque::Plugins::JobHistory::JobViewer.
-          finished_jobs(@job_class_name, @finished_page_num, @finished_page_size),
+      locals: { history_list:        history.finished_list,
                 description:         "Finished Jobs",
                 class_name:          @job_class_name,
                 page_num:            @finished_page_num,
                 page_size:           @finished_page_size,
-                total_jobs:          Resque::Plugins::JobHistory::JobViewer.num_finished_jobs(@job_class_name),
                 primary_type:        "finished",
                 secondary_type:      "running",
                 secondary_page_num:  @running_page_num,

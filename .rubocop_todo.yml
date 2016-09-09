@@ -21,3 +21,7 @@ Style/MutableConstant:
 Style/FileName:
   Exclude:
     - 'lib/resque-job_history.rb'
+
+Metrics/ModuleLength:
+  Exclude:
+    - 'lib/resque/job_history_server.rb'

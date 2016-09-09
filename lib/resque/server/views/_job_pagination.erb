@@ -1,6 +1,6 @@
 <div class="job_history_pagination_block">
-  <% total_pages = total_jobs / page_size %>
-  <% total_pages += 1 if total_jobs % page_size > 0 %>
+  <% total_pages = history_list.num_jobs / page_size %>
+  <% total_pages += 1 if history_list.num_jobs % page_size > 0 %>
   <% first_page = [1, page_num - 3].max %>
   <% last_page = [total_pages, page_num + 3].min %>
   <% last_page = page_num < 4 ? [total_pages, last_page + (4 - page_num)].min : last_page %>
@@ -8,27 +8,25 @@
 
   <% if total_pages > 1 %>
     <div class="job_history_prev_links">
-      <% if first_page > 1 %>
-        <a href="job_class_details?<%= { class_name:                   class_name,
-                                         "#{primary_type}_page_size"   => page_size,
-                                         "#{primary_type}_page_num"    => 1,
-                                         "#{secondary_type}_page_size" => secondary_page_size,
-                                         "#{secondary_type}_page_num"  => secondary_page_num }.to_param %>"
-           class="job_history_first_page">
-          << First
-        </a>
-      <% end %>
+      <a href="job_class_details?<%= { class_name:                   class_name,
+                                       "#{primary_type}_page_size"   => page_size,
+                                       "#{primary_type}_page_num"    => 1,
+                                       "#{secondary_type}_page_size" => secondary_page_size,
+                                       "#{secondary_type}_page_num"  => secondary_page_num }.to_param %>"
+         class="job_history_first_page"
+         disabled="<%= first_page > 1 %>">
+        &lt;&lt; First
+      </a>
 
-      <% if page_num > 1 %>
-        <a href="job_class_details?<%= { class_name:                   class_name,
-                                         "#{primary_type}_page_size"   => page_size,
-                                         "#{primary_type}_page_num"    => page_num - 1,
-                                         "#{secondary_type}_page_size" => secondary_page_size,
-                                         "#{secondary_type}_page_num"  => secondary_page_num }.to_param %>"
-           class="job_history_prev_page">
-          < Prev
-        </a>
-      <% end %>
+      <a href="job_class_details?<%= { class_name:                   class_name,
+                                       "#{primary_type}_page_size"   => page_size,
+                                       "#{primary_type}_page_num"    => [1, page_num - 1].max,
+                                       "#{secondary_type}_page_size" => secondary_page_size,
+                                       "#{secondary_type}_page_num"  => secondary_page_num }.to_param %>"
+         class="job_history_prev_page"
+         disabled="<%= page_num > 1 %>">
+        &lt; Prev
+      </a>
     </div>
 
     <div class="job_history_pages">
@@ -49,27 +47,25 @@
     </div>
 
     <div class="job_history_next_links">
-      <% if page_num < last_page %>
-        <a href="job_class_details?<%= { class_name:                   class_name,
-                                         "#{primary_type}_page_size"   => page_size,
-                                         "#{primary_type}_page_num"    => page_num + 1,
-                                         "#{secondary_type}_page_size" => secondary_page_size,
-                                         "#{secondary_type}_page_num"  => secondary_page_num }.to_param %>"
-           class="job_history_next_page">
-          Next >
-        </a>
-      <% end %>
+      <a href="job_class_details?<%= { class_name:                   class_name,
+                                       "#{primary_type}_page_size"   => page_size,
+                                       "#{primary_type}_page_num"    => [total_pages, page_num + 1].min,
+                                       "#{secondary_type}_page_size" => secondary_page_size,
+                                       "#{secondary_type}_page_num"  => secondary_page_num }.to_param %>"
+         class="job_history_next_page"
+         disabled="<%= page_num < last_page %>">
+        Next &gt;
+      </a>
 
-      <% if last_page < total_pages %>
-        <a href="job_class_details?<%= { class_name:                   class_name,
-                                         "#{primary_type}_page_size"   => page_size,
-                                         "#{primary_type}_page_num"    => total_pages,
-                                         "#{secondary_type}_page_size" => secondary_page_size,
-                                         "#{secondary_type}_page_num"  => secondary_page_num }.to_param %>"
-           class="job_history_last_page">
-          Last >>
-        </a>
-      <% end %>
+      <a href="job_class_details?<%= { class_name:                   class_name,
+                                       "#{primary_type}_page_size"   => page_size,
+                                       "#{primary_type}_page_num"    => total_pages,
+                                       "#{secondary_type}_page_size" => secondary_page_size,
+                                       "#{secondary_type}_page_num"  => secondary_page_num }.to_param %>"
+         class="job_history_last_page"
+         disabled="<%= last_page < total_pages %>">
+        Last &gt;&gt;
+      </a>
     </div>
   <% end %>
 </div>
