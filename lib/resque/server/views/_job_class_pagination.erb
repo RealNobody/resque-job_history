@@ -20,7 +20,7 @@
 
       <a href="job%20history?<%= { sort:      @sort_by,
                                    page_size: page_size,
-                                   page_num:  page_num - 1,
+                                   page_num:  [1, page_num - 1].max,
                                    order:     @sort_order }.to_param %>"
          class="job_history_prev_page"
          disabled="<%= page_num > 1 %>">
@@ -47,7 +47,7 @@
     <div class="job_history_next_links">
       <a href="job%20history?<%= { sort:      @sort_by,
                                    page_size: page_size,
-                                   page_num:  page_num + 1,
+                                   page_num:  [total_pages, page_num + 1].min,
                                    order:     @sort_order }.to_param %>"
          class="job_history_next_page"
          disabled="<%= page_num < last_page %>">

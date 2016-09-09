@@ -39,7 +39,7 @@ bower.json
 # Ignore Byebug command history file.
 .byebug_history
 
-.idea
+.idea/**/*
 cornucopia_report
 coverage
 spec/examples.txt
