@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source "https://rubygems.org"
 
 # Declare your gem's dependencies in resque.gemspec.
@@ -12,7 +14,3 @@ gemspec
 
 # To use a debugger
 # gem "debugger", group: [:development, :test]
-
-gem "gem-release"
-gem "rubocop"
-gem "haml-lint"

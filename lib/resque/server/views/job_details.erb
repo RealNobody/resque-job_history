@@ -67,7 +67,7 @@
   <input type="submit" name="" value="Delete this run"/>
 </form>
 
-<% if Resque::Plugins::JobHistory::HistoryBase.new(@job_class_name).class_name_valid?() %>
+<% if Resque::Plugins::JobHistory::HistoryDetails.new(@job_class_name).class_name_valid?() %>
   <form method="POST" action="retry_job?<%= { class_name: @job_class_name, job_id: @job_id }.to_param %>">
     <input type="submit" name="" value="Retry this run"/>
   </form>

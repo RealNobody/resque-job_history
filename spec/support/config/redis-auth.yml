@@ -1,0 +1,12 @@
+########################################################################################################################
+# WARNING - Never check this into the repository (.erb OK).
+########################################################################################################################
+
+# Using a local Redis server (install with 'brew install redis')
+host: 127.0.0.1
+port: 6379
+db: 1
+
+# Using RedisToGo (don't use it on your dev station, it's only to be used on staging), otherwise we'll
+# run out of clients quickly (cap is at 10 currently)
+#url: "redis://redistogo:your_id_here@greeneye.redistogo.com:port/"

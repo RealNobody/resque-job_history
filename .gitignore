@@ -43,3 +43,4 @@ bower.json
 cornucopia_report
 coverage
 spec/examples.txt
+Gemfile.lock

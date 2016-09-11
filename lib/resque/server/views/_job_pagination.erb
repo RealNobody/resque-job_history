@@ -1,6 +1,7 @@
 <div class="job_history_pagination_block">
   <% total_pages = history_list.num_jobs / page_size %>
   <% total_pages += 1 if history_list.num_jobs % page_size > 0 %>
+  <% page_num = 1 if page_num > total_pages || page_num < 1 %>
   <% first_page = [1, page_num - 3].max %>
   <% last_page = [total_pages, page_num + 3].min %>
   <% last_page = page_num < 4 ? [total_pages, last_page + (4 - page_num)].min : last_page %>

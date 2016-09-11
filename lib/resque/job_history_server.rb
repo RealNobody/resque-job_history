@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "resque"
 require "resque/server"
 require "resque-job_history"
@@ -50,7 +52,7 @@ module Resque
             @sort_by    = params[:sort] || "class_name"
             @sort_order = params[:order] || "asc"
             @page_num   = (params[:page_num] || 1).to_i
-            @page_size  = (params[:page_size] || Resque::Plugins::JobHistory::HistoryBase::PAGE_SIZE).to_i
+            @page_size  = (params[:page_size] || Resque::Plugins::JobHistory::PAGE_SIZE).to_i
           end
         end
       end
@@ -83,8 +85,7 @@ module Resque
         base.class_eval do
           def set_running_page_params
             @running_page_num  = (params[:running_page_num] || 1).to_i
-            @running_page_size = (params[:running_page_size] ||
-                Resque::Plugins::JobHistory::HistoryBase::PAGE_SIZE).to_i
+            @running_page_size = params[:running_page_size]
           end
         end
       end
@@ -93,8 +94,7 @@ module Resque
         base.class_eval do
           def set_finished_page_params
             @finished_page_num  = (params[:finished_page_num] || 1).to_i
-            @finished_page_size = (params[:finished_page_size] ||
-                Resque::Plugins::JobHistory::HistoryBase::PAGE_SIZE).to_i
+            @finished_page_size = params[:finished_page_size]
           end
         end
       end
@@ -181,8 +181,6 @@ module Resque
     Resque::Server.tabs << "Job History"
   end
 end
-
-Resque.extend Resque::JobHistoryServer
 
 Resque::Server.class_eval do
   include Resque::JobHistoryServer

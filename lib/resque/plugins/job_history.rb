@@ -1,4 +1,7 @@
+# frozen_string_literal: true
+
 require "active_support/concern"
+require "active_support/core_ext/numeric/time"
 
 module Resque
   module Plugins
@@ -9,7 +12,9 @@ module Resque
 
       # Redis mapp:
       #   job_history - a set of all of the class names of all jobs
-      #   job_history.<class_name>.max_jobs - The maximum number of jobs that have run for this class.
+      #   job_history.<class_name>.max_jobs - The maximum number of jobs that have run concurrently
+      #                                       for this class.
+      #   job_history.<class_name>.total_failed_jobs - The total number of jobs that have failed
       #   job_history.<class_name>.total_finished_jobs - The maximum number of jobs that have run for
       #                                                  this class.
       #   job_history.<class_name>.running_jobs - a list of the IDs for all running jobs in the order
@@ -22,6 +27,8 @@ module Resque
       #     end_time
       #     error
       MAX_JOB_HISTORY = 200
+      PAGE_SIZE       = 25
+      PURGE_AGE       = 24.hours
 
       # The class methods added to the job class that is being enqueued and whose history is to be
       # recorded.
@@ -47,15 +54,19 @@ module Resque
         end
 
         def job_history_len
-          @job_history_len || MAX_JOB_HISTORY
+          @job_history_len ||= Resque::Plugins::JobHistory::MAX_JOB_HISTORY
         end
 
         def purge_age
-          @purge_jobs_after || 24.hours
+          @purge_jobs_after ||= Resque::Plugins::JobHistory::PURGE_AGE
         end
 
         def page_size
-          @page_size || Resque::Plugins::JobHistory::HistoryBase::PAGE_SIZE
+          @page_size ||= Resque::Plugins::JobHistory::PAGE_SIZE
+        end
+
+        def job_history
+          Resque::Plugins::JobHistory::HistoryDetails.new(name)
         end
       end
     end

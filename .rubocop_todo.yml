@@ -9,19 +9,23 @@
 # Offense count: 1
 Style/Documentation:
   Exclude:
-    - 'spec/**/*'
-    - 'test/**/*'
+    - "spec/**/*"
+    - "test/**/*"
 
 # Offense count: 1
 # Cop supports --auto-correct.
 Style/MutableConstant:
   Exclude:
-    - 'lib/resque/plugins/version.rb'
+    - "lib/resque/plugins/version.rb"
 
 Style/FileName:
   Exclude:
-    - 'lib/resque-job_history.rb'
+    - "lib/resque-job_history.rb"
 
 Metrics/ModuleLength:
   Exclude:
-    - 'lib/resque/job_history_server.rb'
+    - "lib/resque/job_history_server.rb"
+
+Metrics/ClassLength:
+  Exclude:
+    - "spec/support/job_summary_builder.rb"

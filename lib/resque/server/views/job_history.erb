@@ -43,11 +43,11 @@
                                          order_param("start_time", @sort_by, @sort_order) }.to_param %>">
       Last Run Start
     </a></th>
-    <th><a href="job%20history?<%= { sort:      "durration",
+    <th><a href="job%20history?<%= { sort:      "duration",
                                      page_size: @page_size,
                                      page_num:  @page_num,
                                      order:     job_list.
-                                         order_param("durration", @sort_by, @sort_order) }.to_param %>">
+                                         order_param("duration", @sort_by, @sort_order) }.to_param %>">
       Last Run Duration
     </a></th>
     <th><a href="job%20history?<%= { sort:      "success",

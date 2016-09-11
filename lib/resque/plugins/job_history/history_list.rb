@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 module Resque
   module Plugins
     module JobHistory
       # JobHistory cleanup functions to allow the user to cleanup Redis for histories.
-      class HistoryList < HistoryBase
+      class HistoryList < HistoryDetails
         attr_accessor :list_name
 
         def initialize(class_name, list_name)
@@ -18,8 +20,6 @@ module Resque
           redis.incr(total_jobs_key)
 
           delete_old_jobs(job_count)
-
-          job_count
         end
 
         def remove_job(job_id)
@@ -28,9 +28,10 @@ module Resque
 
         def paged_jobs(page_num = 1, page_size = nil)
           page_size ||= class_page_size
-          page_size = Resque::Plugins::JobHistory::HistoryBase::PAGE_SIZE if page_size.to_i < 1
+          page_size = page_size.to_i
+          page_size = Resque::Plugins::JobHistory::PAGE_SIZE if page_size < 1
           start     = (page_num - 1) * page_size
-          start     = 0 if start >= num_jobs
+          start     = 0 if start >= num_jobs || start.negative?
 
           jobs(start, start + page_size - 1)
         end
@@ -62,7 +63,7 @@ module Resque
         private
 
         def add_to_history
-          redis.sadd(job_history_key, class_name)
+          redis.sadd(Resque::Plugins::JobHistory::HistoryDetails.job_history_key, class_name)
         end
 
         def delete_old_jobs(job_count)
@@ -73,6 +74,8 @@ module Resque
 
             job_count -= 1
           end
+
+          job_count
         end
 
         def total_jobs_key

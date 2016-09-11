@@ -3,7 +3,7 @@
 <h1><%= @job_class_name %></h1>
 
 <% job_list = Resque::Plugins::JobHistory::JobList.new %>
-<% history = Resque::Plugins::JobHistory::HistoryBase.new(@job_class_name) %>
+<% history = Resque::Plugins::JobHistory::HistoryDetails.new(@job_class_name) %>
 <% class_info = job_list.job_class_summary(@job_class_name) %>
 
 <a href="<%= u("job history") %>">
@@ -64,7 +64,7 @@
 <%=
   erb(
       File.read(Resque::JobHistoryServer.erb_path("_jobs_list.erb")),
-      locals: { history_list:        history.running_list,
+      locals: { history_list:        history.running_jobs,
                 description:         "Running Jobs",
                 class_name:          @job_class_name,
                 page_num:            @running_page_num,
@@ -79,7 +79,7 @@
 <%=
   erb(
       File.read(Resque::JobHistoryServer.erb_path("_jobs_list.erb")),
-      locals: { history_list:        history.finished_list,
+      locals: { history_list:        history.finished_jobs,
                 description:         "Finished Jobs",
                 class_name:          @job_class_name,
                 page_num:            @finished_page_num,
@@ -93,6 +93,11 @@
 
 <br/>
 
-<form method="POST" action="purge_class?<%= { class_name: @job_class_name }.to_param %>">
-  <input type="submit" name="" value="Purge all histories for <%= @job_class_name %>"/>
-</form>
+<% if Resque::Plugins::JobHistory::Cleaner.similar_name?(@job_class_name) %>
+  This class cannot be purged because of another class with a similar name.  The other class must
+  be purged before this one can be safely purged.
+<% else %>
+  <form method="POST" action="purge_class?<%= { class_name: @job_class_name }.to_param %>">
+    <input type="submit" name="" value="Purge all histories for <%= @job_class_name %>"/>
+  </form>
+<% end %>

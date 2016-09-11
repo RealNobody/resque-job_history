@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 $LOAD_PATH.push File.expand_path("../lib", __FILE__)
 
 # Maintain your gem's version:
@@ -14,14 +16,21 @@ Gem::Specification.new do |s|
   s.description = "Keeps a history of run jobs by job."
   s.license     = "MIT"
 
-  s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
+  s.files      = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
   s.test_files = Dir["test/**/*"]
 
-  s.add_dependency "rails", "~> 3.2"
+  # s.add_dependency "rails", "~> 3.2"
   s.add_dependency "resque", "~> 1.25"
   s.add_dependency "redis-namespace"
   s.add_dependency "redis"
 
   # s.add_development_dependency "sqlite3"
   s.add_development_dependency "rspec-rails"
+  s.add_development_dependency "gem-release"
+  s.add_development_dependency "simplecov"
+  s.add_development_dependency "cornucopia"
+  s.add_development_dependency "rubocop"
+  s.add_development_dependency "haml-lint"
+  s.add_development_dependency "timecop"
+  s.add_development_dependency "faker"
 end
