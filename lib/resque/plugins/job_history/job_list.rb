@@ -24,13 +24,13 @@ module Resque
         def job_summaries(sort_key = :class_name,
                           sort_order = "asc",
                           page_num = 1,
-                          page_size = Resque::Plugins::JobHistory::PAGE_SIZE)
+                          summary_page_size = Resque::Plugins::JobHistory::PAGE_SIZE)
           jobs = sorted_job_summaries(sort_key)
 
-          page_start = (page_num - 1) * page_size
+          page_start = (page_num - 1) * summary_page_size
           page_start = 0 if page_start > jobs.length
 
-          (sort_order == "desc" ? jobs.reverse : jobs)[page_start..page_start + page_size - 1]
+          (sort_order == "desc" ? jobs.reverse : jobs)[page_start..page_start + summary_page_size - 1]
         end
 
         def job_classes

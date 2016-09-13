@@ -27,3 +27,8 @@
 .job_history_last_page {
     margin-left: 5px;
 }
+
+.table_container {
+    width:      100%;
+    overflow-x: scroll;
+}

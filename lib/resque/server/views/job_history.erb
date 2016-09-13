@@ -6,101 +6,103 @@
 <%= erb(File.read(Resque::JobHistoryServer.erb_path("_job_class_pagination.erb")),
         locals: { job_list: job_list, page_num: @page_num, page_size: @page_size }) %>
 
-<table>
-  <tr>
-    <th><a href="job%20history?<%= { sort:      "class_name",
-                                     page_size: @page_size,
-                                     page_num:  @page_num,
-                                     order:     job_list.
-                                         order_param("class_name", @sort_by, @sort_order) }.to_param %>">
-      Class name
-    </a></th>
-    <th><a href="job%20history?<%= { sort:      "running_jobs",
-                                     page_size: @page_size,
-                                     page_num:  @page_num,
-                                     order:     job_list.
-                                         order_param("running_jobs", @sort_by, @sort_order) }.to_param %>">
-      Running
-    </a></th>
-    <th><a href="job%20history?<%= { sort:      "total_finished_jobs",
-                                     page_size: @page_size,
-                                     page_num:  @page_num,
-                                     order:     job_list.
-                                         order_param("total_finished_jobs", @sort_by, @sort_order) }.to_param %>">
-      Finished
-    </a></th>
-    <th><a href="job%20history?<%= { sort:      "max_running_jobs",
-                                     page_size: @page_size,
-                                     page_num:  @page_num,
-                                     order:     job_list.
-                                         order_param("max_running_jobs", @sort_by, @sort_order) }.to_param %>">
-      Max Running
-    </a></th>
-    <th><a href="job%20history?<%= { sort:      "start_time",
-                                     page_size: @page_size,
-                                     page_num:  @page_num,
-                                     order:     job_list.
-                                         order_param("start_time", @sort_by, @sort_order) }.to_param %>">
-      Last Run Start
-    </a></th>
-    <th><a href="job%20history?<%= { sort:      "duration",
-                                     page_size: @page_size,
-                                     page_num:  @page_num,
-                                     order:     job_list.
-                                         order_param("duration", @sort_by, @sort_order) }.to_param %>">
-      Last Run Duration
-    </a></th>
-    <th><a href="job%20history?<%= { sort:      "success",
-                                     page_size: @page_size,
-                                     page_num:  @page_num,
-                                     order:     job_list.
-                                         order_param("success", @sort_by, @sort_order) }.to_param %>">
-      Last Run successful
-    </a></th>
-  </tr>
-
-  <% job_list.job_summaries(@sort_by, @sort_order, @page_num, @page_size).each do |class_info| %>
+<div class="table_container">
+  <table>
     <tr>
-      <td>
-        <a href="job%20history/job_class_details?class_name=<%= class_info[:class_name] %>">
-          <%= class_info[:class_name] %>
-        </a>
-      </td>
-      <td>
-        <%= class_info[:running_jobs].to_i %>
-      </td>
-      <td>
-        <%= class_info[:total_finished_jobs].to_i %>
-      </td>
-      <td>
-        <%= class_info[:max_running_jobs].to_i %>
-      </td>
-      <td>
-        <% if class_info[:last_run] && class_info[:last_run].start_time %>
-          <%= time_ago_in_words(class_info[:last_run].start_time) %> ago
-          (<%= class_info[:last_run].start_time %>)
-        <% end %>
-      </td>
-      <td>
-        <% if class_info[:last_run] %>
-          <% if class_info[:last_run].finished? %>
-            <%= distance_of_time_in_words(class_info[:last_run].start_time, class_info[:last_run].end_time) %>
-            (<%= class_info[:last_run].end_time %>)
-          <% else %>
-            Still running...
-          <% end %>
-        <% end %>
-      </td>
-      <td>
-        <% if class_info[:last_run] && class_info[:last_run].error %>
-          No
-        <% else %>
-          Yes
-        <% end %>
-      </td>
+      <th><a href="job%20history?<%= { sort:      "class_name",
+                                       page_size: @page_size,
+                                       page_num:  @page_num,
+                                       order:     job_list.
+                                           order_param("class_name", @sort_by, @sort_order) }.to_param %>">
+        Class name
+      </a></th>
+      <th><a href="job%20history?<%= { sort:      "running_jobs",
+                                       page_size: @page_size,
+                                       page_num:  @page_num,
+                                       order:     job_list.
+                                           order_param("running_jobs", @sort_by, @sort_order) }.to_param %>">
+        Running
+      </a></th>
+      <th><a href="job%20history?<%= { sort:      "total_finished_jobs",
+                                       page_size: @page_size,
+                                       page_num:  @page_num,
+                                       order:     job_list.
+                                           order_param("total_finished_jobs", @sort_by, @sort_order) }.to_param %>">
+        Finished
+      </a></th>
+      <th><a href="job%20history?<%= { sort:      "max_running_jobs",
+                                       page_size: @page_size,
+                                       page_num:  @page_num,
+                                       order:     job_list.
+                                           order_param("max_running_jobs", @sort_by, @sort_order) }.to_param %>">
+        Max Running
+      </a></th>
+      <th><a href="job%20history?<%= { sort:      "start_time",
+                                       page_size: @page_size,
+                                       page_num:  @page_num,
+                                       order:     job_list.
+                                           order_param("start_time", @sort_by, @sort_order) }.to_param %>">
+        Last Run Start
+      </a></th>
+      <th><a href="job%20history?<%= { sort:      "duration",
+                                       page_size: @page_size,
+                                       page_num:  @page_num,
+                                       order:     job_list.
+                                           order_param("duration", @sort_by, @sort_order) }.to_param %>">
+        Last Run Duration
+      </a></th>
+      <th><a href="job%20history?<%= { sort:      "success",
+                                       page_size: @page_size,
+                                       page_num:  @page_num,
+                                       order:     job_list.
+                                           order_param("success", @sort_by, @sort_order) }.to_param %>">
+        Last Run successful
+      </a></th>
     </tr>
-  <% end %>
-</table>
+
+    <% job_list.job_summaries(@sort_by, @sort_order, @page_num, @page_size).each do |class_info| %>
+      <tr>
+        <td>
+          <a href="job%20history/job_class_details?class_name=<%= class_info[:class_name] %>">
+            <%= class_info[:class_name] %>
+          </a>
+        </td>
+        <td>
+          <%= class_info[:running_jobs].to_i %>
+        </td>
+        <td>
+          <%= class_info[:total_finished_jobs].to_i %>
+        </td>
+        <td>
+          <%= class_info[:max_running_jobs].to_i %>
+        </td>
+        <td>
+          <% if class_info[:last_run] && class_info[:last_run].start_time %>
+            <%= time_ago_in_words(class_info[:last_run].start_time) %> ago
+            (<%= class_info[:last_run].start_time %>)
+          <% end %>
+        </td>
+        <td>
+          <% if class_info[:last_run] %>
+            <% if class_info[:last_run].finished? %>
+              <%= distance_of_time_in_words(class_info[:last_run].start_time, class_info[:last_run].end_time) %>
+              (<%= class_info[:last_run].end_time %>)
+            <% else %>
+              Still running...
+            <% end %>
+          <% end %>
+        </td>
+        <td>
+          <% if class_info[:last_run] && class_info[:last_run].error %>
+            No
+          <% else %>
+            Yes
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+</div>
 
 <%= erb(File.read(Resque::JobHistoryServer.erb_path("_job_class_pagination.erb")),
         locals: { job_list: job_list, page_num: @page_num, page_size: @page_size }) %>

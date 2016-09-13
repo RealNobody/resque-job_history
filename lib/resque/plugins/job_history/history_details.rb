@@ -13,6 +13,14 @@ module Resque
           def job_history_key
             "job_history"
           end
+
+          def class_list_page_size=(value)
+            @class_list_page_size = value
+          end
+
+          def class_list_page_size
+            @class_list_page_size ||= Resque::Plugins::JobHistory::PAGE_SIZE
+          end
         end
 
         def initialize(class_name)
@@ -58,6 +66,10 @@ module Resque
               job.cancel
             end
           end
+        end
+
+        def page_size
+          class_page_size
         end
 
         private

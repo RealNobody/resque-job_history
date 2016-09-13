@@ -43,4 +43,29 @@ RSpec.describe Resque::Plugins::JobHistory::HistoryDetails do
     expect(Resque::Plugins::JobHistory::HistoryDetails.new("InvalidBasicJob").class_name_valid?).
         to be_falsey
   end
+
+  describe "class_list_page_size" do
+    around(:each) do |example_proxy|
+      page_size = Resque::Plugins::JobHistory::HistoryDetails.class_list_page_size
+
+      begin
+        example_proxy.call
+      ensure
+        Resque::Plugins::JobHistory::HistoryDetails.class_list_page_size = page_size
+      end
+    end
+
+    it "returns the PAGE_SIZE by default" do
+      expect(Resque::Plugins::JobHistory::HistoryDetails.class_list_page_size).
+          to eq Resque::Plugins::JobHistory::PAGE_SIZE
+    end
+
+    it "allows you to set any value you want" do
+      page_size = rand(10..20)
+
+      Resque::Plugins::JobHistory::HistoryDetails.class_list_page_size = page_size
+
+      expect(Resque::Plugins::JobHistory::HistoryDetails.class_list_page_size).to eq page_size
+    end
+  end
 end

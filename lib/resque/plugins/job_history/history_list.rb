@@ -26,14 +26,14 @@ module Resque
           redis.lrem(job_list_key, 0, job_id)
         end
 
-        def paged_jobs(page_num = 1, page_size = nil)
-          page_size ||= class_page_size
-          page_size = page_size.to_i
-          page_size = Resque::Plugins::JobHistory::PAGE_SIZE if page_size < 1
-          start     = (page_num - 1) * page_size
-          start     = 0 if start >= num_jobs || start.negative?
+        def paged_jobs(page_num = 1, job_page_size = nil)
+          job_page_size ||= page_size
+          job_page_size = job_page_size.to_i
+          job_page_size = Resque::Plugins::JobHistory::PAGE_SIZE if job_page_size < 1
+          start         = (page_num - 1) * job_page_size
+          start         = 0 if start >= num_jobs || start.negative?
 
-          jobs(start, start + page_size - 1)
+          jobs(start, start + job_page_size - 1)
         end
 
         def jobs(start = 0, stop = -1)
