@@ -50,6 +50,8 @@ module Resque
           rescue StandardError => exception
             running_job.failed exception
             raise
+          ensure
+            running_job.cancel unless running_job.finished? || running_job.error
           end
         end
 

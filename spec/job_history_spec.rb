@@ -130,14 +130,14 @@ RSpec.describe Resque::Plugins::JobHistory do
     end
 
     it "starts a job" do
-      expect(job).to receive(:start).with(*test_args)
+      expect(job).to receive(:start).with(*test_args).and_call_original
 
       job_class.around_perform_job_history(*test_args) do
       end
     end
 
     it "finishes a job" do
-      expect(job).to receive(:finish)
+      expect(job).to receive(:finish).and_call_original
 
       job_class.around_perform_job_history(*test_args) do
       end
@@ -152,7 +152,7 @@ RSpec.describe Resque::Plugins::JobHistory do
     end
 
     it "records failures" do
-      expect(job).to receive(:failed).with(StandardError)
+      expect(job).to receive(:failed).with(StandardError).and_call_original
 
       expect do
         job_class.around_perform_job_history(*test_args) do
