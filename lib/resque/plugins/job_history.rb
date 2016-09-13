@@ -70,6 +70,10 @@ module Resque
           @page_size ||= Resque::Plugins::JobHistory::PAGE_SIZE
         end
 
+        def exclude_from_linear_history
+          @exclude_from_linear_history ||= false
+        end
+
         def job_history
           Resque::Plugins::JobHistory::HistoryDetails.new(name)
         end

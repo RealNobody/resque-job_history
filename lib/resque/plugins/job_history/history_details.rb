@@ -113,6 +113,10 @@ module Resque
           described_class.try(:purge_age) || 24.hours
         end
 
+        def class_exclude_from_linear_history
+          described_class.try(:exclude_from_linear_history) || false
+        end
+
         def class_history_len
           hist_len = described_class.try(:job_history_len) || MAX_JOB_HISTORY
           hist_len.negative? ? 0 : hist_len

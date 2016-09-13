@@ -167,6 +167,13 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
         expect { job.start }.to change { test_job.linear_jobs.num_jobs }.by(1)
       end
 
+      it "does not add the job to the linear list if it is excluded" do
+        exclude_job      = Resque::Plugins::JobHistory::Job.new "ExcludeLiniearHistoryJob", job_id
+        test_exclude_job = Resque::Plugins::JobHistory::Job.new "ExcludeLiniearHistoryJob", job_id
+
+        expect { exclude_job.start }.not_to change { test_exclude_job.linear_jobs.num_jobs }
+      end
+
       it "saves the args" do
         job.start(*test_args)
 

@@ -7,7 +7,8 @@ RSpec.describe Resque::Plugins::JobHistory do
     [BasicJob,
      CustomHistoryLengthJob,
      CustomPageSizeJob,
-     CustomPurgeAgeJob]
+     CustomPurgeAgeJob,
+     ExcludeLiniearHistoryJob]
   end
   let(:history_class) { all_jobs.sample }
   let(:other_histories) { all_jobs - [history_class] }

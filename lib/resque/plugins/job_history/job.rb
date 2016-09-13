@@ -48,7 +48,7 @@ module Resque
 
         def start(*args)
           num_jobs = running_jobs.add_job(job_id, class_name)
-          linear_jobs.add_job(job_id, class_name)
+          linear_jobs.add_job(job_id, class_name) unless class_exclude_from_linear_history
 
           record_job_start(*args)
           record_num_jobs(num_jobs)
