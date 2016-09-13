@@ -6,13 +6,15 @@
 
 <% job_details = Resque::Plugins::JobHistory::Job.new(@job_class_name, @job_id) %>
 
-<a href="<%= u("job history") %>">
-  Job History
-</a>
-|
-<a href="job_class_details?<%= { class_name: @job_class_name }.to_param %>">
-  <%= @job_class_name %>
-</a>
+<p>
+  <a href="<%= u("job history") %>">
+    Job History
+  </a>
+  |
+  <a href="job_class_details?<%= { class_name: @job_class_name }.to_param %>">
+    <%= @job_class_name %>
+  </a>
+</p>
 
 <div class="table_container">
   <table>

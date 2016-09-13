@@ -1,0 +1,61 @@
+<link href="job_history/public/job_history.css" media="screen" rel="stylesheet" type="text/css">
+
+<h1>Linear History</h1>
+
+<p>
+  <a href="<%= u("job history") %>">
+    Job History
+  </a>
+</p>
+
+<% linear_history = Resque::Plugins::JobHistory::JobList.new.linear_jobs %>
+
+<% if linear_history.num_jobs > 0 %>
+  <% jobs = linear_history.paged_jobs(@page_num, @page_size) %>
+  <%= erb(File.read(Resque::JobHistoryServer.erb_path("_linear_pagination.erb")),
+          locals: { linear_history: linear_history,
+                    page_num:       @page_num,
+                    page_size:      @page_size }) %>
+
+  <div class="table_container">
+    <table>
+      <tr>
+        <th>Class</th>
+        <th>Started</th>
+        <th>Duration</th>
+        <th>Parameters</th>
+        <th>Error</th>
+      </tr>
+      <% jobs.each do |job_details| %>
+        <tr>
+          <td>
+            <a href="job_details?class_name=<%= job_details.class_name %>&job_id=<%= job_details.job_id %>">
+              <%= job_details.class_name %>
+            </a>
+          </td>
+          <td>
+            <%= time_ago_in_words(job_details.start_time) %> ago
+            (<%= job_details.start_time %>)
+          </td>
+          <td>
+            <%= distance_of_time_in_words(job_details.start_time, (job_details.end_time || Time.now)) %>
+            <% if job_details.finished? %>
+              (<%= job_details.end_time %>)
+            <% end %>
+          </td>
+          <td>
+            <pre><code><%= "".html_safe + job_details.args.to_yaml %></code></pre>
+          </td>
+          <td>
+            <%= job_details.error %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+
+  <%= erb(File.read(Resque::JobHistoryServer.erb_path("_linear_pagination.erb")),
+          locals: { linear_history: linear_history,
+                    page_num:       @page_num,
+                    page_size:      @page_size }) %>
+<% end %>

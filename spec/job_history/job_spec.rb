@@ -153,10 +153,18 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
 
   context "a new job" do
     describe "start" do
-      it "adds the job to the running list" do
+      it "adds the job to the job list" do
         job.start
 
         expect(Resque::Plugins::JobHistory::JobList.new.job_classes).to eq ["CustomHistoryLengthJob"]
+      end
+
+      it "adds the job to the running list" do
+        expect { job.start }.to change { test_job.running_jobs.num_jobs }.by(1)
+      end
+
+      it "adds the job to the linear list" do
+        expect { job.start }.to change { test_job.linear_jobs.num_jobs }.by(1)
       end
 
       it "saves the args" do
@@ -248,6 +256,12 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
 
         expect { job.finish }.to change { test_job.running_jobs.num_jobs }.by(-1)
       end
+
+      it "does not change the linear list" do
+        job.start
+
+        expect { job.finish }.not_to change { test_job.linear_jobs.num_jobs }
+      end
     end
 
     describe "failed" do
@@ -338,6 +352,12 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
         expect { job.purge }.to change { test_job.running_jobs.num_jobs }.by(-1)
       end
 
+      it "deletes the job from the list of linear jobs" do
+        job.start
+
+        expect { job.purge }.to change { test_job.linear_jobs.num_jobs }.by(-1)
+      end
+
       it "cancels a running job" do
         job.start
 
@@ -394,6 +414,56 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
       purge_jobs.each do |purged_job|
         expect(test_purge_job.running_jobs.job_ids).not_to be_include(purged_job.job_id)
       end
+    end
+  end
+
+  describe "#safe_purge" do
+    it "does not purge the job if it is only in the finished list" do
+      job.start
+      job.finish
+      job.running_jobs.remove_job(job_id)
+      job.linear_jobs.remove_job(job_id)
+
+      expect(test_job.finished_jobs.latest_job.job_id).to eq job.job_id
+
+      job.safe_purge
+
+      expect(test_job.finished_jobs.latest_job.job_id).to eq job.job_id
+    end
+
+    it "does not purge the job if it is only in the running list" do
+      job.start
+      job.finished_jobs.remove_job(job_id)
+      job.linear_jobs.remove_job(job_id)
+
+      expect(test_job.running_jobs.latest_job.job_id).to eq job.job_id
+
+      job.safe_purge
+
+      expect(test_job.running_jobs.latest_job.job_id).to eq job.job_id
+    end
+
+    it "does not purge the job if it is only in the lineear list" do
+      job.start
+      job.finished_jobs.remove_job(job_id)
+      job.running_jobs.remove_job(job_id)
+
+      expect(test_job.linear_jobs.latest_job.job_id).to eq job.job_id
+
+      job.safe_purge
+
+      expect(test_job.linear_jobs.latest_job.job_id).to eq job.job_id
+    end
+
+    it "does purge the job if it is not in any of the three lists" do
+      job.start
+      job.linear_jobs.remove_job(job_id)
+      job.finished_jobs.remove_job(job_id)
+      job.running_jobs.remove_job(job_id)
+
+      job.safe_purge
+
+      expect(test_job.start_time).not_to be
     end
   end
 end

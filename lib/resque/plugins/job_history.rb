@@ -12,9 +12,14 @@ module Resque
 
       # Redis mapp:
       #   job_history - a set of all of the class names of all jobs
+      #   job_history..linear_jobs - a list of the IDs for all jobs that have run in the order
+      #                                          they were started.
+      #   job_history..total_linear_jobs - The total number of jobs added to the linear list.
+      #   job_history..linear_job_classes - The total number of jobs added to the linear list.
       #   job_history.<class_name>.max_jobs - The maximum number of jobs that have run concurrently
       #                                       for this class.
-      #   job_history.<class_name>.total_failed_jobs - The total number of jobs that have failed
+      #   job_history.<class_name>.total_failed_jobs - The total number of jobs that have failed.
+      #   job_history.<class_name>.total_running_jobs - The total number of jobs that have been run.
       #   job_history.<class_name>.total_finished_jobs - The maximum number of jobs that have run for
       #                                                  this class.
       #   job_history.<class_name>.running_jobs - a list of the IDs for all running jobs in the order

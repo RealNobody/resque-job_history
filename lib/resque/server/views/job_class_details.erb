@@ -6,9 +6,11 @@
 <% history = Resque::Plugins::JobHistory::HistoryDetails.new(@job_class_name) %>
 <% class_info = job_list.job_class_summary(@job_class_name) %>
 
-<a href="<%= u("job history") %>">
-  Job History
-</a>
+<p>
+  <a href="<%= u("job history") %>">
+    Job History
+  </a>
+</p>
 
 <div class="table_container">
   <table>
