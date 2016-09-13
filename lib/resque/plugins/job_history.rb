@@ -38,24 +38,19 @@ module Resque
       # The class methods added to the job class that is being enqueued and whose history is to be
       # recorded.
       module ClassMethods
-        attr_reader :running_job
+        def around_perform_job_history(*args)
+          running_job = Resque::Plugins::JobHistory::Job.new(name, SecureRandom.uuid)
 
-        def before_perform_job_history(*args)
-          running_job.cancel if running_job
+          begin
+            running_job.start(*args)
 
-          @running_job = Resque::Plugins::JobHistory::Job.new(name, SecureRandom.uuid)
+            yield if block_given?
 
-          running_job.start(*args)
-        end
-
-        def after_perform_job_history(*_args)
-          running_job.try(:finish)
-          @running_job = nil
-        end
-
-        def on_failure_job_history(exception, *_args)
-          running_job.try(:failed, exception)
-          @running_job = nil
+            running_job.finish
+          rescue StandardError => exception
+            running_job.failed exception
+            raise
+          end
         end
 
         def job_history_len
