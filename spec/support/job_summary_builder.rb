@@ -26,9 +26,9 @@ class JobSummaryBuilder
 
   def summary_hash(class_name)
     { class_name:          class_name,
-      class_name_valid:    valid_class?(class_name),
-      running_jobs:        total_running_in_list,
-      finished_jobs:       total_finished_in_list,
+      class_name_valid?:   valid_class?(class_name),
+      num_running_jobs:    total_running_in_list,
+      num_finished_jobs:   total_finished_in_list,
       total_run_jobs:      total_run,
       total_finished_jobs: total_finished,
       max_concurrent_jobs: max_concurrent,

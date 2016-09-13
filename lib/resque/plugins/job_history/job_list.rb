@@ -37,57 +37,41 @@ module Resque
           redis.smembers(Resque::Plugins::JobHistory::HistoryDetails.job_history_key)
         end
 
-        def job_class_summary(class_name)
-          history = Resque::Plugins::JobHistory::HistoryDetails.new(class_name)
-
-          running_list  = history.running_jobs
-          finished_list = history.finished_jobs
-
-          class_summary_hash(class_name, finished_list, running_list)
+        def job_details(class_name)
+          Resque::Plugins::JobHistory::HistoryDetails.new(class_name)
         end
 
         private
 
-        def latest_job(running_list, finished_list)
-          running_list.latest_job || finished_list.latest_job
-        end
-
         def sorted_job_summaries(sort_key)
-          job_classes.map { |class_name| job_class_summary(class_name) }.sort_by do |job_summary|
-            summary_sort_value(job_summary, sort_key)
+          job_classes.map { |class_name| job_details(class_name) }.sort_by do |job_details|
+            summary_sort_value(job_details, sort_key)
           end
         end
 
-        def summary_sort_value(job_summary, sort_key)
+        def summary_sort_value(job_details, sort_key)
           case sort_key.to_sym
             when :class_name,
-                :running_jobs,
-                :finished_jobs,
+                :num_running_jobs,
+                :num_finished_jobs,
                 :total_finished_jobs,
                 :total_run_jobs,
-                :max_running_jobs
-              job_summary[sort_key.to_sym]
-            when :start_time
-              job_summary[:last_run].start_time
-            when :duration
-              job_summary[:last_run].duration
-            when :success
-              job_summary[:last_run].succeeded? ? 1 : 0
+                :max_concurrent_jobs
+              job_details.public_send sort_key
+            else
+              last_run_sort_value(job_details.last_run, sort_key)
           end
         end
 
-        def class_summary_hash(class_name, finished_list, running_list)
-          { class_name:          class_name,
-            class_name_valid:    running_list.class_name_valid?,
-            running_jobs:        running_list.num_jobs,
-            finished_jobs:       finished_list.num_jobs,
-            total_run_jobs:      running_list.total,
-            total_finished_jobs: finished_list.total,
-            max_concurrent_jobs: Resque::Plugins::JobHistory::HistoryDetails.new(class_name).
-                max_concurrent_jobs,
-            total_failed_jobs:   Resque::Plugins::JobHistory::HistoryDetails.new(class_name).
-                total_failed_jobs,
-            last_run:            latest_job(running_list, finished_list) }
+        def last_run_sort_value(last_run, sort_key)
+          case sort_key.to_sym
+            when :start_time
+              last_run.start_time || Time.now
+            when :duration
+              last_run.duration
+            when :success
+              last_run.succeeded? ? 1 : 0
+          end
         end
       end
     end

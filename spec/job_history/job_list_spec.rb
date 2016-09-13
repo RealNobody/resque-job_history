@@ -14,7 +14,7 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
     %w(InvalidBasicJob
        InvalidCustomHistoryLengthJob
        InvalidCustomPageSizeJob
-       InvalidCustomPurgeAgeJob,
+       InvalidCustomPurgeAgeJob
        InvalidExcludeLiniearHistoryJob)
   end
   let(:tester) { JobSummarySortTester.new self }
@@ -46,12 +46,12 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
         tester.test_ascending(job_list, :class_name)
       end
 
-      it "sorts the list of jobs by running_jobs" do
-        tester.test_ascending(job_list, :running_jobs)
+      it "sorts the list of jobs by num_running_jobs" do
+        tester.test_ascending(job_list, :num_running_jobs)
       end
 
-      it "sorts the list of jobs by finished_jobs" do
-        tester.test_ascending(job_list, :finished_jobs)
+      it "sorts the list of jobs by num_finished_jobs" do
+        tester.test_ascending(job_list, :num_finished_jobs)
       end
 
       it "sorts the list of jobs by total_finished_jobs" do
@@ -62,8 +62,8 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
         tester.test_ascending(job_list, :total_run_jobs)
       end
 
-      it "sorts the list of jobs by max_running_jobs" do
-        tester.test_ascending(job_list, :max_running_jobs)
+      it "sorts the list of jobs by max_concurrent_jobs" do
+        tester.test_ascending(job_list, :max_concurrent_jobs)
       end
 
       it "sorts the list of jobs by start_time" do
@@ -81,10 +81,10 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
 
           jobs.each do |job|
             unless prev_value.blank?
-              expect(job[:last_run].succeeded? ? 1 : 0).to be >= prev_value
+              expect(job.last_run.succeeded? ? 1 : 0).to be >= prev_value
             end
 
-            prev_value = job[:last_run].succeeded? ? 1 : 0
+            prev_value = job.last_run.succeeded? ? 1 : 0
           end
         end
       end
@@ -95,12 +95,12 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
         tester.test_descending(job_list, :class_name)
       end
 
-      it "sorts the list of jobs by running_jobs" do
-        tester.test_descending(job_list, :running_jobs)
+      it "sorts the list of jobs by num_running_jobs" do
+        tester.test_descending(job_list, :num_running_jobs)
       end
 
-      it "sorts the list of jobs by finished_jobs" do
-        tester.test_descending(job_list, :finished_jobs)
+      it "sorts the list of jobs by num_finished_jobs" do
+        tester.test_descending(job_list, :num_finished_jobs)
       end
 
       it "sorts the list of jobs by total_finished_jobs" do
@@ -111,8 +111,8 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
         tester.test_descending(job_list, :total_run_jobs)
       end
 
-      it "sorts the list of jobs by max_running_jobs" do
-        tester.test_descending(job_list, :max_running_jobs)
+      it "sorts the list of jobs by max_concurrent_jobs" do
+        tester.test_descending(job_list, :max_concurrent_jobs)
       end
 
       it "sorts the list of jobs by start_time" do
@@ -130,10 +130,10 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
 
           jobs.each do |job|
             unless prev_value.blank?
-              expect(job[:last_run].succeeded? ? 1 : 0).to be <= prev_value
+              expect(job.last_run.succeeded? ? 1 : 0).to be <= prev_value
             end
 
-            prev_value = job[:last_run].succeeded? ? 1 : 0
+            prev_value = job.last_run.succeeded? ? 1 : 0
           end
         end
       end
@@ -148,7 +148,7 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
     end
   end
 
-  describe "#job_class_summary" do
+  describe "#job_details" do
     it "returns the summary for the passed in class" do
       all_jobs.each do |class_name|
         tester.test_summaries(class_name, job_summaries)
