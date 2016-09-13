@@ -169,11 +169,11 @@ Server Navigation
 
 ####History of a single Job
 
-![Job History](https://raw.githubusercontent.com/RealNobody/resque-job_history/master/read_me/class_details.png)
+![Job History](https://raw.githubusercontent.com/RealNobody/resque-job_history/master/read_me/class_details_page.png)
 
 ####An individual run
 
-![Job History](https://raw.githubusercontent.com/RealNobody/resque-job_history/master/read_me/job_details.png)
+![Job History](https://raw.githubusercontent.com/RealNobody/resque-job_history/master/read_me/job_details_page.png)
 
 
 Accessing Histories Progamatically
