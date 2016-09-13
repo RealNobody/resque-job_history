@@ -7,13 +7,15 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
     [BasicJob,
      CustomHistoryLengthJob,
      CustomPageSizeJob,
-     CustomPurgeAgeJob]
+     CustomPurgeAgeJob,
+     ExcludeLiniearHistoryJob]
   end
   let(:all_invalid_jobs) do
     %w(InvalidBasicJob
        InvalidCustomHistoryLengthJob
        InvalidCustomPageSizeJob
-       InvalidCustomPurgeAgeJob)
+       InvalidCustomPurgeAgeJob,
+       InvalidExcludeLiniearHistoryJob)
   end
   let(:tester) { JobSummarySortTester.new self }
   let(:all_jobs) { (all_valid_jobs.map(&:name) | all_invalid_jobs).sample(1_000) }

@@ -3,7 +3,7 @@
 module Resque
   module Plugins
     module JobHistory
-      VERSION = "0.0.6"
+      VERSION = "0.0.7"
     end
   end
 end
