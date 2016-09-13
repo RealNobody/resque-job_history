@@ -75,7 +75,7 @@
     </tr>
 
     <% job_list.job_summaries(@sort_by, @sort_order, @page_num, @page_size).each do |class_info| %>
-      <tr>
+      <tr<%= class_info[:last_run] && !class_info[:last_run].succeeded? ? " class=\"job_history_error\"" : "" %>>
         <td>
           <a href="job%20history/job_class_details?class_name=<%= class_info[:class_name] %>">
             <%= class_info[:class_name] %>
@@ -110,7 +110,7 @@
           <% end %>
         </td>
         <td>
-          <% if class_info[:last_run] && class_info[:last_run].error %>
+          <% if class_info[:last_run] && !class_info[:last_run].succeeded? %>
             No
           <% else %>
             Yes
