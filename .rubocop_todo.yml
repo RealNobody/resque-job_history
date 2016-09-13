@@ -31,3 +31,4 @@ Metrics/ClassLength:
     - "spec/support/job_summary_builder.rb"
     - "lib/resque/plugins/job_history/job.rb"
     - "lib/resque/plugins/job_history/cleaner.rb"
+    - "lib/resque/plugins/job_history/history_details.rb"

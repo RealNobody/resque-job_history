@@ -80,8 +80,28 @@ module Resque
           redis.get(total_failed_key).to_i
         end
 
+        def num_running_jobs
+          running_jobs.num_jobs
+        end
+
+        def num_finished_jobs
+          finished_jobs.num_jobs
+        end
+
+        def total_run_jobs
+          running_jobs.total
+        end
+
+        def total_finished_jobs
+          finished_jobs.total
+        end
+
         def class_name_valid?
           described_class.present?
+        end
+
+        def last_run
+          running_jobs.latest_job || finished_jobs.latest_job
         end
 
         def clean_old_running_jobs
@@ -104,6 +124,8 @@ module Resque
         private
 
         def described_class
+          return if class_name.blank?
+
           class_name.constantize
         rescue StandardError
           nil

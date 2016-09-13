@@ -162,15 +162,15 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
       cleaner.purge_invalid_jobs
 
       all_invalid_jobs.each do |class_name|
-        stats = job_list.job_class_summary(class_name)
-        expect(stats[:class_name_valid]).to be_falsey
-        expect(stats[:running_jobs]).to eq 0
-        expect(stats[:finished_jobs]).to eq 0
-        expect(stats[:total_run_jobs]).to eq 0
-        expect(stats[:total_finished_jobs]).to eq 0
-        expect(stats[:max_concurrent_jobs]).to eq 0
-        expect(stats[:total_failed_jobs]).to eq 0
-        expect(stats[:last_run]).to be_nil
+        stats = job_list.job_details(class_name)
+        expect(stats.class_name_valid?).to be_falsey
+        expect(stats.num_running_jobs).to eq 0
+        expect(stats.num_finished_jobs).to eq 0
+        expect(stats.total_run_jobs).to eq 0
+        expect(stats.total_finished_jobs).to eq 0
+        expect(stats.max_concurrent_jobs).to eq 0
+        expect(stats.total_failed_jobs).to eq 0
+        expect(stats.last_run).to be_nil
       end
     end
 

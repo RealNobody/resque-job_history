@@ -24,14 +24,20 @@
         <tr<%= job_details.succeeded? ? "" : " class=\"job_history_error\"" %>>
           <td>
             <a href="job_details?class_name=<%= job_details.class_name %>&job_id=<%= job_details.job_id %>">
-              <%= time_ago_in_words(job_details.start_time) %> ago
-              (<%= job_details.start_time %>)
+              <% if job_details.start_time %>
+                <%= time_ago_in_words(job_details.start_time) %> ago
+                (<%= job_details.start_time %>)
+              <% else %>
+                Error - missing start time
+              <% end %>
             </a>
           </td>
           <td>
-            <%= distance_of_time_in_words(job_details.start_time, (job_details.end_time || Time.now)) %>
-            <% if job_details.finished? %>
-              (<%= job_details.end_time %>)
+            <% if job_details.start_time %>
+              <%= distance_of_time_in_words(job_details.start_time, (job_details.end_time || Time.now)) %>
+              <% if job_details.finished? %>
+                (<%= job_details.end_time %>)
+              <% end %>
             <% end %>
           </td>
           <td>

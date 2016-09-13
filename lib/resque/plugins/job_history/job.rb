@@ -27,7 +27,7 @@ module Resque
         end
 
         def succeeded?
-          finished? && error.blank?
+          error.blank?
         end
 
         def duration
@@ -105,13 +105,13 @@ module Resque
           reset
         end
 
+        private
+
         def remove_from_job_lists
           running_jobs.remove_job(job_id)
           finished_jobs.remove_job(job_id)
           linear_jobs.remove_job(job_id)
         end
-
-        private
 
         def record_job_start(*args)
           redis.hset(job_key, "start_time", Time.now.utc.to_s)

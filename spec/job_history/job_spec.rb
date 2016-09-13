@@ -89,7 +89,7 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
       end
 
       it "returns if the job succeeded" do
-        expect(test_job.succeeded?).to be_falsey
+        expect(test_job.succeeded?).to be_truthy
       end
     end
 
@@ -249,7 +249,7 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
         job.start
         job.finish
 
-        expect(test_job.succeeded?)
+        expect(test_job.succeeded?).to be_truthy
       end
 
       it "adds the job to the finished list" do

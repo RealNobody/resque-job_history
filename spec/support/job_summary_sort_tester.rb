@@ -14,10 +14,10 @@ class JobSummarySortTester
 
       jobs.each do |job|
         unless prev_value.blank?
-          tester.expect(job[field_name]).to tester.be >= prev_value
+          tester.expect(job.public_send(field_name.to_sym)).to tester.be >= prev_value
         end
 
-        prev_value = job[field_name]
+        prev_value = job.public_send(field_name.to_sym)
       end
     end
   end
@@ -28,9 +28,11 @@ class JobSummarySortTester
       jobs = get_jobs(job_list, field_name, "asc", index)
 
       jobs.each do |job|
-        tester.expect(job[:last_run].send(method_name)).to tester.be >= prev_value unless prev_value.blank?
+        unless prev_value.blank?
+          tester.expect(job.last_run.send(method_name)).to tester.be >= prev_value
+        end
 
-        prev_value = job[:last_run].send(method_name)
+        prev_value = job.last_run.send(method_name)
       end
     end
   end
@@ -42,10 +44,10 @@ class JobSummarySortTester
 
       jobs.each do |job|
         unless prev_value.blank?
-          tester.expect(job[field_name]).to tester.be <= prev_value
+          tester.expect(job.public_send(field_name.to_sym)).to tester.be <= prev_value
         end
 
-        prev_value = job[field_name]
+        prev_value = job.public_send(field_name.to_sym)
       end
     end
   end
@@ -61,22 +63,22 @@ class JobSummarySortTester
 
       jobs.each do |job|
         unless prev_value.blank?
-          tester.expect(job[:last_run].send(method_name)).to tester.be <= prev_value
+          tester.expect(job.last_run.send(method_name)).to tester.be <= prev_value
         end
 
-        prev_value = job[:last_run].send(method_name)
+        prev_value = job.last_run.send(method_name)
       end
     end
   end
 
   def test_summaries(class_name, expected_job_summaries)
     job_list         = Resque::Plugins::JobHistory::JobList.new
-    actual_summary   = job_list.job_class_summary(class_name)
+    actual_summary   = job_list.job_details(class_name)
     expected_summary = find_expected_summary(class_name, expected_job_summaries)
 
     test_summary_key_values(actual_summary, expected_summary)
 
-    tester.expect(actual_summary[:last_run].job_id).
+    tester.expect(actual_summary.last_run.job_id).
         to tester.eq expected_summary[:last_run].job_id
   end
 
@@ -85,8 +87,8 @@ class JobSummarySortTester
   end
 
   def test_summary_key_values(actual_summary, expected_summary)
-    (actual_summary.keys - [:last_run]).each do |key|
-      tester.expect(actual_summary[key]).to tester.eq expected_summary[key]
+    (expected_summary.keys - [:last_run]).each do |key|
+      tester.expect(actual_summary.public_send(key.to_sym)).to tester.eq expected_summary[key]
     end
   end
 end

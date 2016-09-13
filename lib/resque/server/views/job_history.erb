@@ -23,11 +23,11 @@
                                            order_param("class_name", @sort_by, @sort_order) }.to_param %>">
         Class name
       </a></th>
-      <th><a href="job%20history?<%= { sort:      "running_jobs",
+      <th><a href="job%20history?<%= { sort:      "num_running_jobs",
                                        page_size: @page_size,
                                        page_num:  @page_num,
                                        order:     job_list.
-                                           order_param("running_jobs", @sort_by, @sort_order) }.to_param %>">
+                                           order_param("num_running_jobs", @sort_by, @sort_order) }.to_param %>">
         Running
       </a></th>
       <th><a href="job%20history?<%= { sort:      "total_run_jobs",
@@ -44,11 +44,11 @@
                                            order_param("total_finished_jobs", @sort_by, @sort_order) }.to_param %>">
         Finished
       </a></th>
-      <th><a href="job%20history?<%= { sort:      "max_running_jobs",
+      <th><a href="job%20history?<%= { sort:      "max_concurrent_jobs",
                                        page_size: @page_size,
                                        page_num:  @page_num,
                                        order:     job_list.
-                                           order_param("max_running_jobs", @sort_by, @sort_order) }.to_param %>">
+                                           order_param("max_concurrent_jobs", @sort_by, @sort_order) }.to_param %>">
         Max Running
       </a></th>
       <th><a href="job%20history?<%= { sort:      "start_time",
@@ -75,42 +75,42 @@
     </tr>
 
     <% job_list.job_summaries(@sort_by, @sort_order, @page_num, @page_size).each do |class_info| %>
-      <tr<%= class_info[:last_run] && !class_info[:last_run].succeeded? ? " class=\"job_history_error\"" : "" %>>
+      <tr<%= class_info.last_run && !class_info.last_run.succeeded? ? " class=\"job_history_error\"" : "" %>>
         <td>
-          <a href="job%20history/job_class_details?class_name=<%= class_info[:class_name] %>">
-            <%= class_info[:class_name] %>
+          <a href="job%20history/job_class_details?class_name=<%= class_info.class_name %>">
+            <%= class_info.class_name %>
           </a>
         </td>
         <td>
-          <%= class_info[:running_jobs].to_i %>
+          <%= class_info.num_running_jobs.to_i %>
         </td>
         <td>
-          <%= class_info[:total_run_jobs].to_i %>
+          <%= class_info.total_run_jobs.to_i %>
         </td>
         <td>
-          <%= class_info[:total_finished_jobs].to_i %>
+          <%= class_info.total_finished_jobs.to_i %>
         </td>
         <td>
-          <%= class_info[:max_running_jobs].to_i %>
+          <%= class_info.max_concurrent_jobs.to_i %>
         </td>
         <td>
-          <% if class_info[:last_run] && class_info[:last_run].start_time %>
-            <%= time_ago_in_words(class_info[:last_run].start_time) %> ago
-            (<%= class_info[:last_run].start_time %>)
+          <% if class_info.last_run && class_info.last_run.start_time %>
+            <%= time_ago_in_words(class_info.last_run.start_time) %> ago
+            (<%= class_info.last_run.start_time %>)
           <% end %>
         </td>
         <td>
-          <% if class_info[:last_run] %>
-            <% if class_info[:last_run].finished? %>
-              <%= distance_of_time_in_words(class_info[:last_run].start_time, class_info[:last_run].end_time) %>
-              (<%= class_info[:last_run].end_time %>)
+          <% if class_info.last_run %>
+            <% if class_info.last_run.finished? %>
+              <%= distance_of_time_in_words(class_info.last_run.start_time, class_info.last_run.end_time) %>
+              (<%= class_info.last_run.end_time %>)
             <% else %>
               Still running...
             <% end %>
           <% end %>
         </td>
         <td>
-          <% if class_info[:last_run] && !class_info[:last_run].succeeded? %>
+          <% if class_info.last_run && !class_info.last_run.succeeded? %>
             No
           <% else %>
             Yes
