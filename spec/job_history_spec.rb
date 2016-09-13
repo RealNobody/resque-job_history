@@ -76,82 +76,89 @@ RSpec.describe Resque::Plugins::JobHistory do
     end
   end
 
-  describe ".before_perform_job_history" do
-    it "cancels the previous history if something happens and it is still working" do
-      history_class.before_perform_job_history
-
-      expect(history_class.running_job).to receive(:cancel).and_call_original
-      history_class.before_perform_job_history
-    end
-
-    it "creates a new job" do
-      expect(Resque::Plugins::JobHistory::Job).
-          to receive(:new).and_wrap_original do |original_function, job_name, job_id|
-        expect(job_name).to eq history_class.name
-        expect(job_id).not_to be_empty
-        expect(job_id).to be_instance_of(String)
-
-        original_function.call(job_name, job_id)
+  describe ".around_perform_job_history" do
+    let(:job_class) { BasicJob }
+    let(:job) { Resque::Plugins::JobHistory::Job.new(job_class.name, SecureRandom.uuid) }
+    let(:test_args) do
+      rand_args = []
+      rand_args << Faker::Lorem.sentence
+      rand_args << Faker::Lorem.paragraph
+      rand_args << SecureRandom.uuid.to_s
+      rand_args << rand(0..1_000_000_000_000_000_000_000_000).to_s
+      rand_args << rand(0..1_000_000_000_000).seconds.ago.to_s
+      rand_args << rand(0..1_000_000_000_000).seconds.from_now.to_s
+      rand_args << Array.new(rand(1..5)) { Faker::Lorem.word }
+      rand_args << Array.new(rand(1..5)).each_with_object({}) do |_nil_value, sub_hash|
+        sub_hash[Faker::Lorem.word] = Faker::Lorem.word
       end
 
-      history_class.before_perform_job_history
-    end
+      rand_args = rand_args.sample(rand(3..rand_args.length))
 
-    it "starts the new job" do
-      expect(Resque::Plugins::JobHistory::Job).to receive(:new).
-          and_wrap_original do |original_function, job_name, job_id|
-        new_object = original_function.call(job_name, job_id)
+      if [true, false].sample
+        options_hash                    = {}
+        options_hash[Faker::Lorem.word] = Faker::Lorem.sentence
+        options_hash[Faker::Lorem.word] = Faker::Lorem.paragraph
+        options_hash[Faker::Lorem.word] = SecureRandom.uuid.to_s
+        options_hash[Faker::Lorem.word] = rand(0..1_000_000_000_000_000_000_000_000).to_s
+        options_hash[Faker::Lorem.word] = rand(0..1_000_000_000_000).seconds.ago.to_s
+        options_hash[Faker::Lorem.word] = rand(0..1_000_000_000_000).seconds.from_now.to_s
+        options_hash[Faker::Lorem.word] = Array.new(rand(1..5)) { Faker::Lorem.word }
+        options_hash[Faker::Lorem.word] = Array.new(rand(1..5)).
+            each_with_object({}) do |_nil_value, sub_hash|
+          sub_hash[Faker::Lorem.word] = Faker::Lorem.word
+        end
 
-        expect(new_object).to receive(:start).and_call_original
-
-        new_object
+        rand_args << options_hash.slice(*options_hash.keys.sample(rand(5..options_hash.keys.length)))
       end
 
-      history_class.before_perform_job_history
-    end
-  end
-
-  describe ".after_perform_job_history" do
-    it "finishes the running job" do
-      history_class.before_perform_job_history
-
-      expect(history_class.running_job).to receive(:finish).and_call_original
-
-      history_class.after_perform_job_history
+      rand_args
     end
 
-    it "does nothing if there is no job" do
-      expect(history_class.running_job).not_to be
-      expect { history_class.after_perform_job_history }.not_to raise_error
+    before(:each) do
+      job
+      expect(Resque::Plugins::JobHistory::Job).to receive(:new).exactly(1).times.and_return job
     end
 
-    it "clears the running job" do
-      history_class.before_perform_job_history
-      history_class.after_perform_job_history
+    it "yields to the passed in block" do
+      called = false
 
-      expect(history_class.running_job).not_to be
-    end
-  end
+      job_class.around_perform_job_history(*test_args) do
+        called = true
+      end
 
-  describe ".on_failure_job_history" do
-    it "fails the running job" do
-      history_class.before_perform_job_history
-
-      expect(history_class.running_job).to receive(:failed).with(failure_exception).and_call_original
-
-      history_class.on_failure_job_history failure_exception
+      expect(called).to be_truthy
     end
 
-    it "does nothing if there is no job" do
-      expect(history_class.running_job).not_to be
-      expect { history_class.after_perform_job_history }.not_to raise_error
+    it "starts a job" do
+      expect(job).to receive(:start).with(*test_args)
+
+      job_class.around_perform_job_history(*test_args) do
+      end
     end
 
-    it "clears the running job" do
-      history_class.before_perform_job_history
-      history_class.on_failure_job_history failure_exception
+    it "finishes a job" do
+      expect(job).to receive(:finish)
 
-      expect(history_class.running_job).not_to be
+      job_class.around_perform_job_history(*test_args) do
+      end
+    end
+
+    it "re-raises any exception that is raised" do
+      expect do
+        job_class.around_perform_job_history(*test_args) do
+          raise StandardError, "This is an error"
+        end
+      end.to raise_error StandardError, "This is an error"
+    end
+
+    it "records failures" do
+      expect(job).to receive(:failed).with(StandardError)
+
+      expect do
+        job_class.around_perform_job_history(*test_args) do
+          raise StandardError, "This is an error"
+        end
+      end.to raise_error StandardError, "This is an error"
     end
   end
 end
