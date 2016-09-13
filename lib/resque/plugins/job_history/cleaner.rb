@@ -16,16 +16,30 @@ module Resque
             job_classes.each do |class_name|
               fixup_job_keys class_name
             end
+            fixup_linear_keys
           end
 
           def fixup_job_keys(class_name)
-            keys = job_keys(class_name)
-            keys -= Resque::Plugins::JobHistory::HistoryList.new(class_name, "running").job_ids
-            keys -= Resque::Plugins::JobHistory::HistoryList.new(class_name, "finished").job_ids
+            keys = unknown_job_keys(class_name)
 
             keys.each do |stranded_key|
               Resque::Plugins::JobHistory::Job.new(class_name, stranded_key).purge
               del_key(stranded_key, "Stranded job key deleted")
+            end
+          end
+
+          def fixup_linear_keys
+            details  = Resque::Plugins::JobHistory::HistoryDetails.new("")
+            hash_key = details.linear_jobs.job_classes_key
+
+            classes = details.redis.hgetall hash_key
+            job_ids = details.linear_jobs.job_ids
+
+            classes.keys.each do |job_id|
+              next if job_ids.include?(job_id)
+
+              Resque.logger.warn("deleting missing job class - #{job_id}")
+              details.redis.hdel hash_key, job_id
             end
           end
 
@@ -52,6 +66,10 @@ module Resque
           def purge_class(class_name)
             return if similar_name?(class_name)
 
+            details = Resque::Plugins::JobHistory::HistoryDetails.new("class_name")
+            details.running_jobs.jobs.each(&:purge)
+            details.finished_jobs.jobs.each(&:purge)
+
             class_keys(class_name).each do |job_key|
               del_key(job_key, "Purging job key")
             end
@@ -75,19 +93,40 @@ module Resque
             history_base.redis.keys("#{history_base.job_history_base_key}*")
           end
 
+          def job_id_keys(class_name, job_ids)
+            job_ids.map do |job_id|
+              "#{Resque::Plugins::JobHistory::HistoryDetails.job_history_key}.#{class_name}.#{job_id}"
+            end
+          end
+
           def job_keys(class_name)
             history_base = Resque::Plugins::JobHistory::HistoryDetails.new(class_name)
 
-            history_base.redis.keys("#{history_base.job_history_base_key}.*") - job_support_keys(history_base)
+            history_base.redis.keys("#{history_base.job_history_base_key}*") - job_support_keys(history_base)
           end
 
           def job_support_keys(history_base)
             ["#{history_base.job_history_base_key}.running_jobs",
              "#{history_base.job_history_base_key}.total_running_jobs",
+             "#{history_base.job_history_base_key}.running_job_classes",
+             "#{history_base.job_history_base_key}.linear_jobs",
+             "#{history_base.job_history_base_key}.total_linear_jobs",
+             "#{history_base.job_history_base_key}.linear_job_classes",
              "#{history_base.job_history_base_key}.finished_jobs",
              "#{history_base.job_history_base_key}.total_finished_jobs",
+             "#{history_base.job_history_base_key}.finished_job_classes",
              "#{history_base.job_history_base_key}.max_jobs",
              "#{history_base.job_history_base_key}.total_failed"]
+          end
+
+          def unknown_job_keys(class_name)
+            keys = job_keys(class_name)
+            keys -= job_id_keys(class_name,
+                                Resque::Plugins::JobHistory::HistoryList.new(class_name, "running").job_ids)
+            keys -= job_id_keys(class_name,
+                                Resque::Plugins::JobHistory::HistoryList.new(class_name, "finished").job_ids)
+            keys - job_id_keys(class_name,
+                               Resque::Plugins::JobHistory::HistoryList.new("", "linear").job_ids)
           end
 
           def redis

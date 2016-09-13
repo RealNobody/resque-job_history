@@ -7,7 +7,8 @@ module Resque
       class HistoryDetails
         attr_accessor :class_name
 
-        NAME_SPACE = "Resque::Plugins::ResqueJobHistory"
+        NAME_SPACE         = "Resque::Plugins::ResqueJobHistory"
+        MAX_LINEAR_HISTORY = 500
 
         class << self
           def job_history_key
@@ -16,10 +17,33 @@ module Resque
 
           def class_list_page_size=(value)
             @class_list_page_size = value
+            @class_list_page_size = 1 if @class_list_page_size < 1
           end
 
           def class_list_page_size
             @class_list_page_size ||= Resque::Plugins::JobHistory::PAGE_SIZE
+          end
+
+          def linear_page_size=(value)
+            @linear_page_size = value
+            @linear_page_size = 1 if @linear_page_size < 1
+          end
+
+          def linear_page_size
+            @linear_page_size ||= Resque::Plugins::JobHistory::PAGE_SIZE
+          end
+
+          def max_linear_jobs
+            @max_linear_jobs ||= MAX_LINEAR_HISTORY
+          end
+
+          def max_linear_jobs=(value)
+            @max_linear_jobs = value
+
+            return unless @max_linear_jobs.present?
+
+            @max_linear_jobs = @max_linear_jobs.to_i
+            @max_linear_jobs = nil if @max_linear_jobs.negative?
           end
         end
 
@@ -41,6 +65,11 @@ module Resque
 
         def finished_jobs
           @finished_list ||= HistoryList.new(class_name, "finished")
+        end
+
+        def linear_jobs
+          @linear_list ||= HistoryList.new("", "linear",
+                                           Resque::Plugins::JobHistory::HistoryDetails.max_linear_jobs)
         end
 
         def max_concurrent_jobs
@@ -85,11 +114,13 @@ module Resque
         end
 
         def class_history_len
-          described_class.try(:job_history_len) || MAX_JOB_HISTORY
+          hist_len = described_class.try(:job_history_len) || MAX_JOB_HISTORY
+          hist_len.negative? ? 0 : hist_len
         end
 
         def class_page_size
-          described_class.try(:page_size) || Resque::Plugins::JobHistory::PAGE_SIZE
+          pg_size = described_class.try(:page_size) || Resque::Plugins::JobHistory::PAGE_SIZE
+          pg_size < 1 ? 1 : pg_size
         end
 
         def total_failed_key

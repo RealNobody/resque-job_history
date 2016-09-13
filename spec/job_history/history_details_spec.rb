@@ -19,10 +19,17 @@ RSpec.describe Resque::Plugins::JobHistory::HistoryDetails do
 
   it "has running_jobs" do
     expect(history_details.running_jobs).to be_a Resque::Plugins::JobHistory::HistoryList
+    expect(history_details.running_jobs.class_name).to eq history_details.class_name
+  end
+
+  it "has linear_jobs" do
+    expect(history_details.linear_jobs).to be_a Resque::Plugins::JobHistory::HistoryList
+    expect(history_details.linear_jobs.class_name).to eq ""
   end
 
   it "has finished_jobs" do
     expect(history_details.finished_jobs).to be_a Resque::Plugins::JobHistory::HistoryList
+    expect(history_details.finished_jobs.class_name).to eq history_details.class_name
   end
 
   it "returns max_concurrent_jobs" do
@@ -60,12 +67,82 @@ RSpec.describe Resque::Plugins::JobHistory::HistoryDetails do
           to eq Resque::Plugins::JobHistory::PAGE_SIZE
     end
 
-    it "allows you to set any value you want" do
+    it "allows you to set any positive value you want" do
       page_size = rand(10..20)
 
       Resque::Plugins::JobHistory::HistoryDetails.class_list_page_size = page_size
 
       expect(Resque::Plugins::JobHistory::HistoryDetails.class_list_page_size).to eq page_size
+    end
+
+    it "does not allow a value < 1" do
+      page_size = rand(-100..0)
+
+      Resque::Plugins::JobHistory::HistoryDetails.class_list_page_size = page_size
+
+      expect(Resque::Plugins::JobHistory::HistoryDetails.class_list_page_size).to eq 1
+    end
+  end
+
+  describe "linear_page_size" do
+    around(:each) do |example_proxy|
+      page_size = Resque::Plugins::JobHistory::HistoryDetails.linear_page_size
+
+      begin
+        example_proxy.call
+      ensure
+        Resque::Plugins::JobHistory::HistoryDetails.linear_page_size = page_size
+      end
+    end
+
+    it "returns the PAGE_SIZE by default" do
+      expect(Resque::Plugins::JobHistory::HistoryDetails.linear_page_size).
+          to eq Resque::Plugins::JobHistory::PAGE_SIZE
+    end
+
+    it "allows you to set any positive value you want" do
+      page_size = rand(10..20)
+
+      Resque::Plugins::JobHistory::HistoryDetails.linear_page_size = page_size
+
+      expect(Resque::Plugins::JobHistory::HistoryDetails.linear_page_size).to eq page_size
+    end
+
+    it "does not allow a value < 1" do
+      page_size = rand(-100..0)
+
+      Resque::Plugins::JobHistory::HistoryDetails.linear_page_size = page_size
+
+      expect(Resque::Plugins::JobHistory::HistoryDetails.linear_page_size).to eq 1
+    end
+  end
+
+  describe "#max_linear_jobs" do
+    before(:each) do
+      Resque::Plugins::JobHistory::HistoryDetails.max_linear_jobs = nil
+    end
+    after(:each) do
+      Resque::Plugins::JobHistory::HistoryDetails.max_linear_jobs = nil
+    end
+
+    it "defaults to #{Resque::Plugins::JobHistory::HistoryDetails::MAX_LINEAR_HISTORY}" do
+      expect(Resque::Plugins::JobHistory::HistoryDetails.max_linear_jobs).
+          to eq Resque::Plugins::JobHistory::HistoryDetails::MAX_LINEAR_HISTORY
+    end
+
+    it "can be set to any positive value" do
+      value = rand(0..1_000)
+
+      Resque::Plugins::JobHistory::HistoryDetails.max_linear_jobs = value
+      expect(Resque::Plugins::JobHistory::HistoryDetails.max_linear_jobs).to eq value
+    end
+
+    it "cannot be set to any negative value" do
+      value = rand(-1_000..-1)
+
+      Resque::Plugins::JobHistory::HistoryDetails.max_linear_jobs = value
+      expect(Resque::Plugins::JobHistory::HistoryDetails.max_linear_jobs).
+          to eq Resque::Plugins::JobHistory::HistoryDetails::MAX_LINEAR_HISTORY
     end
   end
 end

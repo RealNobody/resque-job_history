@@ -47,7 +47,8 @@ module Resque
         end
 
         def start(*args)
-          num_jobs = running_jobs.add_job(job_id)
+          num_jobs = running_jobs.add_job(job_id, class_name)
+          linear_jobs.add_job(job_id, class_name)
 
           record_job_start(*args)
           record_num_jobs(num_jobs)
@@ -56,7 +57,7 @@ module Resque
         def finish
           redis.hset(job_key, "end_time", Time.now.utc.to_s)
 
-          finished_jobs.add_job(job_id)
+          finished_jobs.add_job(job_id, class_name)
           running_jobs.remove_job(job_id)
 
           reset
@@ -85,16 +86,29 @@ module Resque
           Resque.enqueue described_class, *args
         end
 
+        def safe_purge
+          return if running_jobs.includes_job?(job_id)
+          return if finished_jobs.includes_job?(job_id)
+          return if linear_jobs.includes_job?(job_id)
+
+          purge
+        end
+
         def purge
           # To keep the counts honest...
           cancel unless finished?
 
-          running_jobs.remove_job(job_id)
-          finished_jobs.remove_job(job_id)
+          remove_from_job_lists
 
           redis.del(job_key)
 
           reset
+        end
+
+        def remove_from_job_lists
+          running_jobs.remove_job(job_id)
+          finished_jobs.remove_job(job_id)
+          linear_jobs.remove_job(job_id)
         end
 
         private

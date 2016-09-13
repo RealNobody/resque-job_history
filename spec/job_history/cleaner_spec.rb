@@ -49,12 +49,17 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
 
   describe "#fixup_job_keys" do
     it "purges stranded jobs" do
+      other_job = Resque::Plugins::JobHistory::Job.new "BasicJob", SecureRandom.uuid
+      other_job.start
       job.start
       job.running_jobs.remove_job(job_id)
+      job.linear_jobs.remove_job(job_id)
 
+      expect(job.redis.keys("*#{other_job.job_id}*")).not_to be_blank
       expect(job.redis.keys("*#{job_id}*")).not_to be_blank
       expect { cleaner.fixup_job_keys(job.class_name) }.not_to change { job.running_jobs.num_jobs }
       expect(job.redis.keys("*#{job_id}*")).to be_blank
+      expect(job.redis.keys("*#{other_job.job_id}*")).not_to be_blank
     end
 
     it "deletes other non-job keys" do
@@ -62,6 +67,30 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
       job.finish
       job.redis.set("job_history.#{job.class_name}.#{job_id}.something stupid", "silly")
       job.finished_jobs.remove_job(job_id)
+      job.linear_jobs.remove_job(job_id)
+
+      expect(job.redis.keys("*#{job_id}*")).not_to be_blank
+      expect { cleaner.fixup_job_keys(job.class_name) }.not_to change { job.finished_jobs.num_jobs }
+      expect(job.redis.keys("*#{job_id}*")).to be_blank
+    end
+
+    it "does not deletes job keys in the linear list" do
+      job.start
+      job.finish
+      job.redis.set("job_history.#{job.class_name}.#{job_id}.something stupid", "silly")
+      job.finished_jobs.remove_job(job_id)
+
+      expect(job.redis.keys("*#{job_id}*")).not_to be_blank
+      expect { cleaner.fixup_job_keys(job.class_name) }.not_to change { job.finished_jobs.num_jobs }
+      expect(job.redis.keys("*#{job_id}*")).not_to be_blank
+      expect(job.redis.keys("*#{job_id}*something stupid")).to be_blank
+    end
+
+    it "deletes other non-job keys of purged jobs" do
+      job.start
+      job.finish
+      job.redis.set("job_history.#{job.class_name}.#{job_id}.something stupid", "silly")
+      job.purge
 
       expect(job.redis.keys("*#{job_id}*")).not_to be_blank
       expect { cleaner.fixup_job_keys(job.class_name) }.not_to change { job.finished_jobs.num_jobs }
@@ -75,15 +104,18 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
       job.cancel
       job.redis.set("job_history.#{job.class_name}.#{job_id}.something stupid", "silly")
       job.finished_jobs.remove_job(job_id)
+      job.linear_jobs.remove_job(job_id)
 
       expect(job.redis.keys("*#{job_id}*")).not_to be_blank
       expect { cleaner.fixup_job_keys(job.class_name) }.
-          not_to change { [job.running_jobs.num_jobs, job.finished_jobs.num_jobs] }
+          not_to change { [job.running_jobs.num_jobs, job.finished_jobs.num_jobs, job.linear_jobs.num_jobs] }
       expect(job.redis.keys("*#{job_id}*")).to be_blank
       expect(job.finished_jobs.num_jobs).to be >= 1
       expect(job.running_jobs.num_jobs).to be >= 1
+      expect(job.linear_jobs.num_jobs).to be >= 1
       expect(job.finished_jobs.job_ids).not_to be_include(job_id)
       expect(job.running_jobs.job_ids).not_to be_include(job_id)
+      expect(job.linear_jobs.job_ids).not_to be_include(job_id)
     end
   end
 
@@ -194,6 +226,34 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
       cleaner.purge_class(similar_job_class)
 
       expect(purge_job.redis.get("job_history.#{purge_job.class_name}something stupid")).not_to be_nil
+    end
+  end
+
+  describe "#fixup_linear_keys" do
+    it "removes jobs from the class list that are stranded" do
+      job.start
+      job.redis.lrem("job_history..linear_jobs", 0, job.job_id)
+
+      expect(job.redis.hget("job_history..linear_job_classes", job.job_id)).to eq job.class_name
+
+      cleaner.fixup_linear_keys
+
+      expect(job.redis.hget("job_history..linear_job_classes", job.job_id)).not_to be
+    end
+
+    it "doesn't affect valid jobs" do
+      other_job = Resque::Plugins::JobHistory::Job.new "BasicJob", SecureRandom.uuid
+      other_job.start
+      job.start
+      job.redis.lrem("job_history..linear_jobs", 0, job.job_id)
+
+      expect(job.redis.hget("job_history..linear_job_classes", job.job_id)).to eq job.class_name
+      expect(job.redis.hget("job_history..linear_job_classes", other_job.job_id)).to eq other_job.class_name
+
+      cleaner.fixup_linear_keys
+
+      expect(job.redis.hget("job_history..linear_job_classes", job.job_id)).not_to be
+      expect(job.redis.hget("job_history..linear_job_classes", other_job.job_id)).to eq other_job.class_name
     end
   end
 end

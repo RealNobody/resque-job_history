@@ -29,3 +29,5 @@ Metrics/ModuleLength:
 Metrics/ClassLength:
   Exclude:
     - "spec/support/job_summary_builder.rb"
+    - "lib/resque/plugins/job_history/job.rb"
+    - "lib/resque/plugins/job_history/cleaner.rb"

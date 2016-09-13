@@ -21,7 +21,7 @@
         <th>Error</th>
       </tr>
       <% jobs.each do |job_details| %>
-        <tr>
+        <tr<%= job_details.succeeded? ? "" : " class=\"job_history_error\"" %>>
           <td>
             <a href="job_details?class_name=<%= job_details.class_name %>&job_id=<%= job_details.job_id %>">
               <%= time_ago_in_words(job_details.start_time) %> ago

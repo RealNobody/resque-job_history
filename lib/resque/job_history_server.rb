@@ -32,6 +32,7 @@ module Resque
         job_history(base)
         class_details(base)
         job_details(base)
+        linear_list(base)
       end
 
       def job_history(base)
@@ -49,8 +50,8 @@ module Resque
       def job_history_params(base)
         base.class_eval do
           def set_job_history_params
-            @sort_by    = params[:sort] || "class_name"
-            @sort_order = params[:order] || "asc"
+            @sort_by    = params[:sort] || "start_time"
+            @sort_order = params[:order] || "desc"
             @page_num   = (params[:page_num] || 1).to_i
             @page_size  = (params[:page_size] ||
                 Resque::Plugins::JobHistory::HistoryDetails.class_list_page_size).to_i
@@ -109,6 +110,18 @@ module Resque
             @job_id         = params[:job_id]
 
             erb File.read(Resque::JobHistoryServer.erb_path("job_details.erb"))
+          end
+        end
+      end
+
+      def linear_list(base)
+        base.class_eval do
+          get "/job history/linear_history" do
+            @page_num  = (params[:page_num] || 1).to_i
+            @page_size = (params[:page_size] ||
+                Resque::Plugins::JobHistory::HistoryDetails.linear_page_size).to_i
+
+            erb File.read(Resque::JobHistoryServer.erb_path("linear_history.erb"))
           end
         end
       end
