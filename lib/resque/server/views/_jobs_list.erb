@@ -23,7 +23,8 @@
       <% jobs.each do |job_details| %>
         <tr<%= job_details.succeeded? ? "" : " class=\"job_history_error\"" %>>
           <td>
-            <a href="job_details?class_name=<%= job_details.class_name %>&job_id=<%= job_details.job_id %>">
+            <a href="<%= u("job history/job_details") %>?class_name=<%=
+              job_details.class_name %>&job_id=<%= job_details.job_id %>">
               <% if job_details.start_time %>
                 <%= time_ago_in_words(job_details.start_time) %> ago
                 (<%= job_details.start_time %>)

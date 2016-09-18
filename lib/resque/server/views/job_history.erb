@@ -1,4 +1,4 @@
-<link href="job_history/public/job_history.css" media="screen" rel="stylesheet" type="text/css">
+<link href="<%= u("job_history/public/job_history.css") %>" media="screen" rel="stylesheet" type="text/css">
 
 <h1>Job Classes</h1>
 
@@ -16,60 +16,68 @@
 <div class="table_container">
   <table>
     <tr>
-      <th><a href="job%20history?<%= { sort:      "class_name",
-                                       page_size: @page_size,
-                                       page_num:  @page_num,
-                                       order:     job_list.
-                                           order_param("class_name", @sort_by, @sort_order) }.to_param %>">
+      <th><a href="<%= u("job history") %>?<%=
+        { sort:      "class_name",
+          page_size: @page_size,
+          page_num:  @page_num,
+          order:     job_list.
+              order_param("class_name", @sort_by, @sort_order) }.to_param %>">
         Class name
       </a></th>
-      <th><a href="job%20history?<%= { sort:      "num_running_jobs",
-                                       page_size: @page_size,
-                                       page_num:  @page_num,
-                                       order:     job_list.
-                                           order_param("num_running_jobs", @sort_by, @sort_order) }.to_param %>">
+      <th><a href="<%= u("job history") %>?<%=
+        { sort:      "num_running_jobs",
+          page_size: @page_size,
+          page_num:  @page_num,
+          order:     job_list.
+              order_param("num_running_jobs", @sort_by, @sort_order) }.to_param %>">
         Running
       </a></th>
-      <th><a href="job%20history?<%= { sort:      "total_run_jobs",
-                                       page_size: @page_size,
-                                       page_num:  @page_num,
-                                       order:     job_list.
-                                           order_param("total_run_jobs", @sort_by, @sort_order) }.to_param %>">
+      <th><a href="<%= u("job history") %>?<%=
+        { sort:      "total_run_jobs",
+          page_size: @page_size,
+          page_num:  @page_num,
+          order:     job_list.
+              order_param("total_run_jobs", @sort_by, @sort_order) }.to_param %>">
         Total Run
       </a></th>
-      <th><a href="job%20history?<%= { sort:      "total_finished_jobs",
-                                       page_size: @page_size,
-                                       page_num:  @page_num,
-                                       order:     job_list.
-                                           order_param("total_finished_jobs", @sort_by, @sort_order) }.to_param %>">
+      <th><a href="<%= u("job history") %>?<%=
+        { sort:      "total_finished_jobs",
+          page_size: @page_size,
+          page_num:  @page_num,
+          order:     job_list.
+              order_param("total_finished_jobs", @sort_by, @sort_order) }.to_param %>">
         Finished
       </a></th>
-      <th><a href="job%20history?<%= { sort:      "max_concurrent_jobs",
-                                       page_size: @page_size,
-                                       page_num:  @page_num,
-                                       order:     job_list.
-                                           order_param("max_concurrent_jobs", @sort_by, @sort_order) }.to_param %>">
-        Max Running
+      <th><a href="<%= u("job history") %>?<%=
+        { sort:      "total_failed_jobs",
+          page_size: @page_size,
+          page_num:  @page_num,
+          order:     job_list.
+              order_param("total_failed_jobs", @sort_by, @sort_order) }.to_param %>">
+        Failed
       </a></th>
-      <th><a href="job%20history?<%= { sort:      "start_time",
-                                       page_size: @page_size,
-                                       page_num:  @page_num,
-                                       order:     job_list.
-                                           order_param("start_time", @sort_by, @sort_order) }.to_param %>">
+      <th><a href="<%= u("job history") %>?<%=
+        { sort:      "start_time",
+          page_size: @page_size,
+          page_num:  @page_num,
+          order:     job_list.
+              order_param("start_time", @sort_by, @sort_order) }.to_param %>">
         Last Run Start
       </a></th>
-      <th><a href="job%20history?<%= { sort:      "duration",
-                                       page_size: @page_size,
-                                       page_num:  @page_num,
-                                       order:     job_list.
-                                           order_param("duration", @sort_by, @sort_order) }.to_param %>">
+      <th><a href="<%= u("job history") %>?<%=
+        { sort:      "duration",
+          page_size: @page_size,
+          page_num:  @page_num,
+          order:     job_list.
+              order_param("duration", @sort_by, @sort_order) }.to_param %>">
         Last Run Duration
       </a></th>
-      <th><a href="job%20history?<%= { sort:      "success",
-                                       page_size: @page_size,
-                                       page_num:  @page_num,
-                                       order:     job_list.
-                                           order_param("success", @sort_by, @sort_order) }.to_param %>">
+      <th><a href="<%= u("job history") %>?<%=
+        { sort:      "success",
+          page_size: @page_size,
+          page_num:  @page_num,
+          order:     job_list.
+              order_param("success", @sort_by, @sort_order) }.to_param %>">
         Last Run successful
       </a></th>
     </tr>
@@ -77,7 +85,7 @@
     <% job_list.job_summaries(@sort_by, @sort_order, @page_num, @page_size).each do |class_info| %>
       <tr<%= class_info.last_run && !class_info.last_run.succeeded? ? " class=\"job_history_error\"" : "" %>>
         <td>
-          <a href="job%20history/job_class_details?class_name=<%= class_info.class_name %>">
+          <a href="<%= u("job history") %>/job_class_details?class_name=<%= class_info.class_name %>">
             <%= class_info.class_name %>
           </a>
         </td>
@@ -91,7 +99,7 @@
           <%= class_info.total_finished_jobs.to_i %>
         </td>
         <td>
-          <%= class_info.max_concurrent_jobs.to_i %>
+          <%= class_info.total_failed_jobs.to_i %>
         </td>
         <td>
           <% if class_info.last_run && class_info.last_run.start_time %>
@@ -127,7 +135,7 @@
 <br/>
 
 <div>
-  <form method="POST" action="job%20history/purge_all">
+  <form method="POST" action="<%= u("job history/purge_all") %>">
     <input type="submit" name="" value="Purge all histories"/>
   </form>
 </div>

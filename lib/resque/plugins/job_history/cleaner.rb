@@ -55,6 +55,21 @@ module Resque
             end
           end
 
+          def purge_linear_history
+            linear_jobs = Resque::Plugins::JobHistory::JobList.new.linear_jobs
+
+            fixup_linear_keys
+
+            linear_jobs.job_ids.each do |job_id|
+              linear_jobs.remove_job(job_id)
+            end
+
+            list_keys = redis.keys("job_history..*")
+            list_keys.each do |key|
+              del_key(key, "Purging unknown linear history key")
+            end
+          end
+
           def purge_invalid_jobs
             job_classes.each do |class_name|
               next if Resque::Plugins::JobHistory::HistoryDetails.new(class_name).class_name_valid?

@@ -9,19 +9,19 @@
 
   <% if total_pages > 1 %>
     <div class="job_history_prev_links">
-      <a href="job%20history?<%= { sort:      @sort_by,
-                                   page_size: page_size,
-                                   page_num:  1,
-                                   order:     @sort_order }.to_param %>"
+      <a href="<%= u("job history") %>?<%= { sort:      @sort_by,
+                                             page_size: page_size,
+                                             page_num:  1,
+                                             order:     @sort_order }.to_param %>"
          class="job_history_first_page"
          disabled="<%= first_page > 1 %>">
         &lt;&lt; First
       </a>
 
-      <a href="job%20history?<%= { sort:      @sort_by,
-                                   page_size: page_size,
-                                   page_num:  [1, page_num - 1].max,
-                                   order:     @sort_order }.to_param %>"
+      <a href="<%= u("job history") %>?<%= { sort:      @sort_by,
+                                             page_size: page_size,
+                                             page_num:  [1, page_num - 1].max,
+                                             order:     @sort_order }.to_param %>"
          class="job_history_prev_page"
          disabled="<%= page_num > 1 %>">
         &lt; Prev
@@ -31,10 +31,10 @@
     <div class="job_history_pages">
       <% (first_page..last_page).each do |page_number| %>
         <% if page_number != page_num %>
-          <a href="job%20history?<%= { sort:      @sort_by,
-                                       page_size: page_size,
-                                       page_num:  page_number,
-                                       order:     @sort_order }.to_param %>"
+          <a href="<%= u("job history") %>?<%= { sort:      @sort_by,
+                                                 page_size: page_size,
+                                                 page_num:  page_number,
+                                                 order:     @sort_order }.to_param %>"
              class="job_history_page">
             <%= page_number %>
           </a>
@@ -45,19 +45,19 @@
     </div>
 
     <div class="job_history_next_links">
-      <a href="job%20history?<%= { sort:      @sort_by,
-                                   page_size: page_size,
-                                   page_num:  [total_pages, page_num + 1].min,
-                                   order:     @sort_order }.to_param %>"
+      <a href="<%= u("job history") %>?<%= { sort:      @sort_by,
+                                             page_size: page_size,
+                                             page_num:  [total_pages, page_num + 1].min,
+                                             order:     @sort_order }.to_param %>"
          class="job_history_next_page"
          disabled="<%= page_num < last_page %>">
         Next &gt;
       </a>
 
-      <a href="job%20history?<%= { sort:      @sort_by,
-                                   page_size: page_size,
-                                   page_num:  total_pages,
-                                   order:     @sort_order }.to_param %>"
+      <a href="<%= u("job history") %>?<%= { sort:      @sort_by,
+                                             page_size: page_size,
+                                             page_num:  total_pages,
+                                             order:     @sort_order }.to_param %>"
          class="job_history_last_page"
          disabled="<%= last_page < total_pages %>">
         Last &gt;&gt;
