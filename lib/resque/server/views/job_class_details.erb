@@ -1,4 +1,4 @@
-<link href="job_history/public/job_history.css" media="screen" rel="stylesheet" type="text/css">
+<link href="<%= u("job_history/public/job_history.css") %>" media="screen" rel="stylesheet" type="text/css">
 
 <h1><%= @job_class_name %></h1>
 
@@ -36,6 +36,14 @@
       </td>
       <td>
         <%= class_info.total_finished_jobs.to_i %>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Total jobs failed
+      </td>
+      <td>
+        <%= class_info.total_failed_jobs.to_i %>
       </td>
     </tr>
     <tr>
@@ -101,7 +109,7 @@
   This class cannot be purged because of another class with a similar name.  The other class must
   be purged before this one can be safely purged.
 <% else %>
-  <form method="POST" action="purge_class?<%= { class_name: @job_class_name }.to_param %>">
+  <form method="POST" action="<%= u("job history/purge_class") %>?<%= { class_name: @job_class_name }.to_param %>">
     <input type="submit" name="" value="Purge all histories for <%= @job_class_name %>"/>
   </form>
 <% end %>

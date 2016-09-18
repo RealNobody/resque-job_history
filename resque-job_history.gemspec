@@ -33,4 +33,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "haml-lint"
   s.add_development_dependency "timecop"
   s.add_development_dependency "faker"
+  s.add_development_dependency "rack-test"
 end

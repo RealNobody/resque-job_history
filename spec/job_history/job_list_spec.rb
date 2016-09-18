@@ -88,6 +88,21 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
           end
         end
       end
+
+      it "sorts the list of jobs by class_name_valid?" do
+        prev_value = ""
+        Array.new(4) do |index|
+          jobs = job_list.job_summaries(:class_name_valid?, "asc", index + 1, 2)
+
+          jobs.each do |job|
+            unless prev_value.blank?
+              expect(job.class_name_valid? ? 1 : 0).to be >= prev_value
+            end
+
+            prev_value = job.class_name_valid? ? 1 : 0
+          end
+        end
+      end
     end
 
     context "descending" do
@@ -134,6 +149,21 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
             end
 
             prev_value = job.last_run.succeeded? ? 1 : 0
+          end
+        end
+      end
+
+      it "sorts the list of jobs by class_name_valid?" do
+        prev_value = ""
+        Array.new(4) do |index|
+          jobs = job_list.job_summaries(:class_name_valid?, "desc", index + 1, 2)
+
+          jobs.each do |job|
+            unless prev_value.blank?
+              expect(job.class_name_valid? ? 1 : 0).to be <= prev_value
+            end
+
+            prev_value = job.class_name_valid? ? 1 : 0
           end
         end
       end

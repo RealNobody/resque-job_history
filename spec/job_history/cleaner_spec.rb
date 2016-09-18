@@ -24,6 +24,7 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
   let(:job_list) { Resque::Plugins::JobHistory::JobList.new }
   let(:job_id) { SecureRandom.uuid.to_s }
   let(:job) { Resque::Plugins::JobHistory::Job.new "CustomHistoryLengthJob", job_id }
+  let(:jobs) { all_jobs.map { |job_name| Resque::Plugins::JobHistory::Job.new job_name, SecureRandom.uuid } }
 
   before(:each) do
     job_summaries
@@ -174,7 +175,7 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
       end
     end
 
-    it "does not purt valid classes" do
+    it "does not purge valid classes" do
       all_valid_jobs.each do |valid_class|
         tester.test_summaries(valid_class.name, job_summaries)
       end
@@ -256,6 +257,35 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
 
       expect(job.redis.hget("job_history..linear_job_classes", job.job_id)).not_to be
       expect(job.redis.hget("job_history..linear_job_classes", other_job.job_id)).to eq other_job.class_name
+    end
+  end
+
+  describe "#purge_linear_history" do
+    it "deletes all jobs from the linear history" do
+      expect(job_list.linear_jobs.num_jobs).not_to eq 0
+
+      cleaner.purge_linear_history
+
+      expect(job_list.linear_jobs.num_jobs).to eq 0
+    end
+
+    it "does not purge the jobs from class lists" do
+      cleaner.purge_linear_history
+
+      all_jobs.each do |class_name|
+        tester.test_summaries(class_name, job_summaries)
+      end
+    end
+
+    it "fixes linear keys" do
+      expect(cleaner).to receive(:fixup_linear_keys).and_call_original
+      cleaner.purge_linear_history
+    end
+
+    it "purges unknown keys" do
+      job_list.redis.set("job_history..unknown key to delete", 1)
+      cleaner.purge_linear_history
+      expect(job_list.redis.keys("job_history..*")).to be_blank
     end
   end
 end

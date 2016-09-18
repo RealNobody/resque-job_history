@@ -56,8 +56,11 @@ module Resque
                 :num_finished_jobs,
                 :total_finished_jobs,
                 :total_run_jobs,
-                :max_concurrent_jobs
+                :max_concurrent_jobs,
+                :total_failed_jobs
               job_details.public_send sort_key
+            when :class_name_valid?
+              job_details.class_name_valid? ? 1 : 0
             else
               last_run_sort_value(job_details.last_run, sort_key)
           end
@@ -66,12 +69,24 @@ module Resque
         def last_run_sort_value(last_run, sort_key)
           case sort_key.to_sym
             when :start_time
-              last_run.start_time || Time.now
+              last_run_start_time_sort(last_run)
             when :duration
-              last_run.duration
+              last_run_duration_sort(last_run)
             when :success
-              last_run.succeeded? ? 1 : 0
+              last_run_succeeded_sort(last_run)
           end
+        end
+
+        def last_run_succeeded_sort(last_run)
+          last_run.try(:succeeded?) ? 1 : 0
+        end
+
+        def last_run_duration_sort(last_run)
+          last_run.try(:duration) || 100.years
+        end
+
+        def last_run_start_time_sort(last_run)
+          last_run.try(:start_time) || Time.now
         end
       end
     end

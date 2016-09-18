@@ -1,4 +1,4 @@
-<link href="job_history/public/job_history.css" media="screen" rel="stylesheet" type="text/css">
+<link href="<%= u("job_history/public/job_history.css") %>" media="screen" rel="stylesheet" type="text/css">
 
 <h1>
   <%= @job_class_name %>
@@ -11,7 +11,7 @@
     Job History
   </a>
   |
-  <a href="job_class_details?<%= { class_name: @job_class_name }.to_param %>">
+  <a href="<%= u("job history/job_class_details") %>?<%= { class_name: @job_class_name }.to_param %>">
     <%= @job_class_name %>
   </a>
 </p>
@@ -68,17 +68,20 @@
 <br/>
 
 <% unless job_details.finished? %>
-  <form method="POST" action="cancel_job?<%= { class_name: @job_class_name, job_id: @job_id }.to_param %>">
+  <form method="POST" action="<%= u("job history/cancel_job") %>?<%=
+    { class_name: @job_class_name, job_id: @job_id }.to_param %>">
     <input type="submit" name="" value="Job is not running - Cancel job"/>
   </form>
 <% end %>
 
-<form method="POST" action="delete_job?<%= { class_name: @job_class_name, job_id: @job_id }.to_param %>">
+<form method="POST" action="<%= u("job history/delete_job") %>?<%=
+  { class_name: @job_class_name, job_id: @job_id }.to_param %>">
   <input type="submit" name="" value="Delete this run"/>
 </form>
 
 <% if Resque::Plugins::JobHistory::HistoryDetails.new(@job_class_name).class_name_valid?() %>
-  <form method="POST" action="retry_job?<%= { class_name: @job_class_name, job_id: @job_id }.to_param %>">
+  <form method="POST" action="<%= u("job history/retry_job") %>?<%=
+    { class_name: @job_class_name, job_id: @job_id }.to_param %>">
     <input type="submit" name="" value="Retry this run"/>
   </form>
 <% end %>

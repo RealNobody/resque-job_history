@@ -1,4 +1,4 @@
-<link href="job_history/public/job_history.css" media="screen" rel="stylesheet" type="text/css">
+<link href="<%= u("job_history/public/job_history.css") %>" media="screen" rel="stylesheet" type="text/css">
 
 <h1>Linear History</h1>
 
@@ -29,7 +29,8 @@
       <% jobs.each do |job_details| %>
         <tr<%= job_details.succeeded? ? "" : " class=\"job_history_error\"" %>>
           <td>
-            <a href="job_details?class_name=<%= job_details.class_name %>&job_id=<%= job_details.job_id %>">
+            <a href="<%= u("job history/job_details") %>?<%=
+              { class_name: job_details.class_name, job_id: job_details.job_id }.to_param %>">
               <%= job_details.class_name %>
             </a>
           </td>
@@ -42,7 +43,7 @@
             <% end %>
           </td>
           <td>
-            <%# = distance_of_time_in_words(job_details.start_time, (job_details.end_time || Time.now)) %>
+            <%= distance_of_time_in_words(job_details.start_time, (job_details.end_time || Time.now)) %>
             <% if job_details.finished? %>
               (<%= job_details.end_time %>)
             <% end %>
@@ -63,3 +64,11 @@
                     page_num:       @page_num,
                     page_size:      @page_size }) %>
 <% end %>
+
+<br/>
+
+<div>
+  <form method="POST" action="<%= u("job history/purge_linear_history") %>">
+    <input type="submit" name="" value="Purge linear histories"/>
+  </form>
+</div>

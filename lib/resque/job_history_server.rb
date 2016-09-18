@@ -3,6 +3,8 @@
 require "resque"
 require "resque/server"
 require "resque-job_history"
+require "action_view/helpers/output_safety_helper"
+require "action_view/helpers/capture_helper"
 require "action_view/helpers/date_helper"
 
 module Resque
@@ -136,6 +138,7 @@ module Resque
 
       def add_button_callbacks(base)
         purge_all(base)
+        purge_linear_history(base)
         purge_class(base)
         retry_job(base)
         delete_job(base)
@@ -187,6 +190,16 @@ module Resque
         base.class_eval do
           post "/job history/purge_all" do
             Resque::Plugins::JobHistory::Cleaner.purge_all_jobs
+
+            redirect u("job history")
+          end
+        end
+      end
+
+      def purge_linear_history(base)
+        base.class_eval do
+          post "/job history/purge_linear_history" do
+            Resque::Plugins::JobHistory::Cleaner.purge_linear_history
 
             redirect u("job history")
           end
