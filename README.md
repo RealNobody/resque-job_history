@@ -258,7 +258,7 @@ The Cleaner class includes these useful functions:
   finished or linear list.
 * fixup_job_keys - Cleanup any keys for a particular Job class.
 
-Search is a utility class that you can use to search the histories.  You
+JobSearch is a utility class that you can use to search the histories.  You
 can access the search through the front-end, or you can use it
 programatically to find histories.
 
@@ -299,7 +299,7 @@ The following functions are available for your use:
   criteria.
 
 ```Ruby
-search = Resque::Plugins::JobHistory::Search.
+search = Resque::Plugins::JobHistory::JobSearch.
     new(search_type: "search_all",
         search_for:  "some.*regex",
         regex_search: true)
