@@ -127,4 +127,12 @@ RSpec.describe "linear_history.erb" do
 
     expect(last_response.body).to be_include("Sample Failure")
   end
+
+  it "allows a search of the linear history" do
+    get "/job%20history/linear_history"
+
+    expect(last_response).to be_ok
+
+    expect(last_response.body).to match(%r{action="/job history/search_linear_history"})
+  end
 end

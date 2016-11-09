@@ -258,6 +258,61 @@ The Cleaner class includes these useful functions:
   finished or linear list.
 * fixup_job_keys - Cleanup any keys for a particular Job class.
 
+Search is a utility class that you can use to search the histories.  You
+can access the search through the front-end, or you can use it
+programatically to find histories.
+
+When used programatically, you pass in options through a hash.  The options
+for the hash are:
+
+* :search_type - String - Requried - The type of search to be performed.
+  * search_all - Search the class names and the arguments to a run.
+  * search_job - Search the arguments for the runs for a specific class.
+  * search_linear_history - Search the arguments for all runs in the
+    linear history.
+* :job_class_name - String - Required for everything other than "search_all"
+* :search_for - String - The string to search for.
+  * If this string is blank, only jobs with no arguments will be matched.
+  * When arguments are searched, the arguments will be serialized using
+    the Resque argument serializer before being searched.
+* :regex_search - Boolean - Optional - If true, search_for will be interpreted as a
+  regular expression.
+* :case_insensitive - Boolean - Optional - If true the search will be done
+  case insensitive.
+
+The search will run for approximately 10 seconds and return whatever results
+it finds during that time.
+
+The following functions are available for your use:
+
+* search - Perform the search.  If the search completes and has more_records?
+  You can call it again to continue the search.  If you continue a previous
+  search, the previous search results will NOT be cleared and any new
+  results will be appended.
+* more_records? - Returns true if the search stopped before it searched
+  all known records.
+* class_results - After search is called, this will contain a list of
+  HistoryDetails objects for the classes that were found that matched the search
+  criteria.
+* run_results - After search is called, this will contain a list of Job
+  objects that are the individual runs whose arguments matched the search
+  criteria.
+
+```Ruby
+search = Resque::Plugins::JobHistory::Search.
+    new(search_type: "search_all",
+        search_for:  "some.*regex",
+        regex_search: true)
+
+# Find all values no matter how long it takes...
+search.search
+search.search while search.more_records?
+
+# Access the results.
+search.class_results
+search.run_results
+```
+
 ## Contributing
 
 1. Fork it

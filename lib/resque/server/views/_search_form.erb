@@ -1,0 +1,14 @@
+<div id="job_history_search_div">
+  <form method="POST" action="<%= u("job history/#{job_search.search_type}") %>">
+    <% job_search.retry_search_settings(false).each do |setting_name, setting_value| %>
+      <input type="hidden" name="<%= setting_name %>" value="<%= setting_value %>"/>
+    <% end %>
+
+    <input type="checkbox" name="regex_search" <%= job_search.regex_search ? "checked" : "" %> value="true"/>
+    Regex
+    <input type="checkbox" name="case_insensitive" <%= job_search.case_insensitive ? "checked" : "" %> value="true"/>
+    Case Insensitive
+    <input type="text" size="50" name="search_for" value="<%= job_search.search_for %>"/>
+    <input type="submit" value="Search"/>
+  </form>
+</div>

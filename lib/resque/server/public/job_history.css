@@ -36,3 +36,21 @@
 .job_history_error {
     background-color: lightcoral;
 }
+
+.job_history_linear_history_div {
+    margin-top: 5px;
+    float:      left;
+}
+
+#job_history_search_div {
+    float:         right;
+    margin-bottom: 10px;
+}
+
+#job_history_search_div form {
+    margin-top: 0px;
+}
+
+.job_history_reset {
+    clear: both;
+}

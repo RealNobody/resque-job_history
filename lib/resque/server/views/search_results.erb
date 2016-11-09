@@ -1,0 +1,68 @@
+<link href="<%= u("job_history/public/job_history.css") %>" media="screen" rel="stylesheet" type="text/css">
+
+<h1>Search Results</h1>
+
+<div>
+  <div class="job_history_linear_history_div">
+    <a href="<%= u("job history") %>">
+      Job History
+    </a>
+  </div>
+
+  <%= erb(File.read(Resque::JobHistoryServer.erb_path("_search_form.erb")),
+          locals: { job_search: @job_search }) %>
+</div>
+<div class="job_history_reset"/>
+
+<% if @job_search.more_records? %>
+  <div>
+    <p>
+      The search took too long and was stopped. You can continue the search from the point it was
+      stopped at <a href="#continue_search">below</a>.
+    </p>
+  </div>
+<% end %>
+
+<% if @job_search.class_results.blank? && @job_search.run_results.blank? %>
+  <div>
+    <p>
+      No results were found.
+    </p>
+  </div>
+<% end %>
+
+<% if @job_search.class_results.present? %>
+  <div class="table_container">
+    <table>
+      <tr>
+        <th>Class name</th>
+        <th>Running</th>
+        <th>Total Run</th>
+        <th>Finished</th>
+        <th>Failed</th>
+        <th>Last Run Start</th>
+        <th>Last Run Duration</th>
+        <th>Last Run successful</th>
+      </tr>
+
+      <%= erb(File.read(Resque::JobHistoryServer.erb_path("_job_summary_rows.erb")),
+              locals: { summary_rows: @job_search.class_results }) %>
+    </table>
+  </div>
+<% end %>
+
+<% if @job_search.run_results.present? %>
+  <%= erb(File.read(Resque::JobHistoryServer.erb_path("_job_list_table.erb")),
+          locals: { jobs: @job_search.run_results, show_class: true }) %>
+<% end %>
+
+<% if @job_search.more_records? %>
+  <form id="continue_search" method="POST" action="<%= u("job history/#{@job_search.search_type}") %>">
+    <% @job_search.search_settings(true).each do |setting_name, setting_value| %>
+      <input type="hidden" name="<%= setting_name %>" value="<%= setting_value %>"/>
+    <% end %>
+
+    <input type="submit" value="Continue Search"/>
+  </form>
+<% end %>
+<div class="job_history_reset"/>

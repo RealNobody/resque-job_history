@@ -12,45 +12,8 @@
                     secondary_page_num:  secondary_page_num,
                     secondary_page_size: secondary_page_size }) %>
 
-  <div class="table_container">
-    <table>
-      <tr>
-        <th>Started</th>
-        <th>Duration</th>
-        <th>Parameters</th>
-        <th>Error</th>
-      </tr>
-      <% jobs.each do |job_details| %>
-        <tr<%= job_details.succeeded? ? "" : " class=\"job_history_error\"" %>>
-          <td>
-            <a href="<%= u("job history/job_details") %>?class_name=<%=
-              job_details.class_name %>&job_id=<%= job_details.job_id %>">
-              <% if job_details.start_time %>
-                <%= time_ago_in_words(job_details.start_time) %> ago
-                (<%= job_details.start_time %>)
-              <% else %>
-                Error - missing start time
-              <% end %>
-            </a>
-          </td>
-          <td>
-            <% if job_details.start_time %>
-              <%= distance_of_time_in_words(job_details.start_time, (job_details.end_time || Time.now)) %>
-              <% if job_details.finished? %>
-                (<%= job_details.end_time %>)
-              <% end %>
-            <% end %>
-          </td>
-          <td>
-            <pre><code><%= "".html_safe + job_details.args.to_yaml %></code></pre>
-          </td>
-          <td>
-            <%= job_details.error %>
-          </td>
-        </tr>
-      <% end %>
-    </table>
-  </div>
+  <%= erb(File.read(Resque::JobHistoryServer.erb_path("_job_list_table.erb")),
+          locals: { jobs: jobs, show_class: false }) %>
 
   <%= erb(File.read(Resque::JobHistoryServer.erb_path("_job_pagination.erb")),
           locals: { history_list:        history_list,

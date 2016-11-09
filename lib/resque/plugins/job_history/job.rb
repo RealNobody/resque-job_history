@@ -54,6 +54,8 @@ module Resque
 
           record_job_start(*args)
           record_num_jobs(num_jobs)
+
+          self
         end
 
         def finish
@@ -63,6 +65,8 @@ module Resque
           running_jobs.remove_job(job_id)
 
           reset
+
+          self
         end
 
         def failed(exception)

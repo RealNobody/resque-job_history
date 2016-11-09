@@ -2,11 +2,19 @@
 
 <h1>Linear History</h1>
 
-<p>
-  <a href="<%= u("job history") %>">
-    Job History
-  </a>
-</p>
+<div>
+  <div class="job_history_linear_history_div">
+    <a href="<%= u("job history") %>">
+      Job History
+    </a>
+  </div>
+
+  <% job_search = Resque::Plugins::JobHistory::JobSearch.
+      new(search_type: "search_linear_history") %>
+  <%= erb(File.read(Resque::JobHistoryServer.erb_path("_search_form.erb")),
+          locals: { job_search: job_search }) %>
+</div>
+<div class="job_history_reset" />
 
 <% linear_history = Resque::Plugins::JobHistory::JobList.new.linear_jobs %>
 
@@ -17,47 +25,8 @@
                     page_num:       @page_num,
                     page_size:      @page_size }) %>
 
-  <div class="table_container">
-    <table>
-      <tr>
-        <th>Class</th>
-        <th>Started</th>
-        <th>Duration</th>
-        <th>Parameters</th>
-        <th>Error</th>
-      </tr>
-      <% jobs.each do |job_details| %>
-        <tr<%= job_details.succeeded? ? "" : " class=\"job_history_error\"" %>>
-          <td>
-            <a href="<%= u("job history/job_details") %>?<%=
-              { class_name: job_details.class_name, job_id: job_details.job_id }.to_param %>">
-              <%= job_details.class_name %>
-            </a>
-          </td>
-          <td>
-            <% if job_details.start_time %>
-              <%= time_ago_in_words(job_details.start_time) %> ago
-              (<%= job_details.start_time %>)
-            <% else %>
-              Error - missing start time
-            <% end %>
-          </td>
-          <td>
-            <%= distance_of_time_in_words(job_details.start_time, (job_details.end_time || Time.now)) %>
-            <% if job_details.finished? %>
-              (<%= job_details.end_time %>)
-            <% end %>
-          </td>
-          <td>
-            <pre><code><%= "".html_safe + job_details.args.to_yaml %></code></pre>
-          </td>
-          <td>
-            <%= job_details.error %>
-          </td>
-        </tr>
-      <% end %>
-    </table>
-  </div>
+  <%= erb(File.read(Resque::JobHistoryServer.erb_path("_job_list_table.erb")),
+          locals: { jobs: jobs, show_class: true }) %>
 
   <%= erb(File.read(Resque::JobHistoryServer.erb_path("_linear_pagination.erb")),
           locals: { linear_history: linear_history,
@@ -72,3 +41,4 @@
     <input type="submit" name="" value="Purge linear histories"/>
   </form>
 </div>
+<div class="job_history_reset"/>

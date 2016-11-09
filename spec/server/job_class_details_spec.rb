@@ -143,4 +143,13 @@ RSpec.describe "job_class_details.erb" do
 
     expect(last_response.body).to be_include("Sample Failure")
   end
+
+  it "allows a search of this class" do
+    get "/job%20history/job_class_details?class_name=CustomPageSizeJob"
+
+    expect(last_response).to be_ok
+
+    expect(last_response.body).to match(%r{action="/job history/search_job"})
+    expect(last_response.body).to match(/name="job_class_name" value="CustomPageSizeJob"/)
+  end
 end

@@ -4,11 +4,19 @@
 
 <% job_list = Resque::Plugins::JobHistory::JobList.new %>
 
-<p>
-  <a href="<%= u("job history/linear_history") %>">
-    Linear History
-  </a>
-</p>
+<div>
+  <div class="job_history_linear_history_div">
+    <a href="<%= u("job history/linear_history") %>">
+      Linear History
+    </a>
+  </div>
+
+  <% job_search = Resque::Plugins::JobHistory::JobSearch.
+      new(search_type: "search_all") %>
+  <%= erb(File.read(Resque::JobHistoryServer.erb_path("_search_form.erb")),
+          locals: { job_search: job_search }) %>
+</div>
+<div class="job_history_reset" />
 
 <%= erb(File.read(Resque::JobHistoryServer.erb_path("_job_class_pagination.erb")),
         locals: { job_list: job_list, page_num: @page_num, page_size: @page_size }) %>
@@ -82,50 +90,8 @@
       </a></th>
     </tr>
 
-    <% job_list.job_summaries(@sort_by, @sort_order, @page_num, @page_size).each do |class_info| %>
-      <tr<%= class_info.last_run && !class_info.last_run.succeeded? ? " class=\"job_history_error\"" : "" %>>
-        <td>
-          <a href="<%= u("job history") %>/job_class_details?class_name=<%= class_info.class_name %>">
-            <%= class_info.class_name %>
-          </a>
-        </td>
-        <td>
-          <%= class_info.num_running_jobs.to_i %>
-        </td>
-        <td>
-          <%= class_info.total_run_jobs.to_i %>
-        </td>
-        <td>
-          <%= class_info.total_finished_jobs.to_i %>
-        </td>
-        <td>
-          <%= class_info.total_failed_jobs.to_i %>
-        </td>
-        <td>
-          <% if class_info.last_run && class_info.last_run.start_time %>
-            <%= time_ago_in_words(class_info.last_run.start_time) %> ago
-            (<%= class_info.last_run.start_time %>)
-          <% end %>
-        </td>
-        <td>
-          <% if class_info.last_run %>
-            <% if class_info.last_run.finished? %>
-              <%= distance_of_time_in_words(class_info.last_run.start_time, class_info.last_run.end_time) %>
-              (<%= class_info.last_run.end_time %>)
-            <% else %>
-              Still running...
-            <% end %>
-          <% end %>
-        </td>
-        <td>
-          <% if class_info.last_run && !class_info.last_run.succeeded? %>
-            No
-          <% else %>
-            Yes
-          <% end %>
-        </td>
-      </tr>
-    <% end %>
+    <%= erb(File.read(Resque::JobHistoryServer.erb_path("_job_summary_rows.erb")),
+            locals: { summary_rows: job_list.job_summaries(@sort_by, @sort_order, @page_num, @page_size) }) %>
   </table>
 </div>
 
@@ -139,3 +105,4 @@
     <input type="submit" name="" value="Purge all histories"/>
   </form>
 </div>
+<div class="job_history_reset"/>

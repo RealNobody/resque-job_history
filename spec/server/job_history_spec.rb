@@ -126,4 +126,12 @@ RSpec.describe "job_history.erb" do
 
     expect(last_response.body).to match(/class="job_history_error"/)
   end
+
+  it "allows a search of all classes" do
+    get "/job%20history"
+
+    expect(last_response).to be_ok
+
+    expect(last_response.body).to match(%r{action="/job history/search_all"})
+  end
 end

@@ -1,0 +1,44 @@
+<% summary_rows.each do |class_info| %>
+  <tr<%= class_info.last_run && !class_info.last_run.succeeded? ? " class=\"job_history_error\"" : "" %>>
+    <td>
+      <a href="<%= u("job history") %>/job_class_details?class_name=<%= class_info.class_name %>">
+        <%= class_info.class_name %>
+      </a>
+    </td>
+    <td>
+      <%= class_info.num_running_jobs.to_i %>
+    </td>
+    <td>
+      <%= class_info.total_run_jobs.to_i %>
+    </td>
+    <td>
+      <%= class_info.total_finished_jobs.to_i %>
+    </td>
+    <td>
+      <%= class_info.total_failed_jobs.to_i %>
+    </td>
+    <td>
+      <% if class_info.last_run && class_info.last_run.start_time %>
+        <%= time_ago_in_words(class_info.last_run.start_time) %> ago
+        (<%= class_info.last_run.start_time %>)
+      <% end %>
+    </td>
+    <td>
+      <% if class_info.last_run %>
+        <% if class_info.last_run.finished? %>
+          <%= distance_of_time_in_words(class_info.last_run.start_time, class_info.last_run.end_time) %>
+          (<%= class_info.last_run.end_time %>)
+        <% else %>
+          Still running...
+        <% end %>
+      <% end %>
+    </td>
+    <td>
+      <% if class_info.last_run && !class_info.last_run.succeeded? %>
+        No
+      <% else %>
+        Yes
+      <% end %>
+    </td>
+  </tr>
+<% end %>
