@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # rubocop:disable ClassLength
 
 module Resque
@@ -6,16 +7,16 @@ module Resque
     module JobHistory
       # This class searches through jobs looking for one which matches the passed in criteria.
       class JobSearch
-        ALL_ATTRIBUTES = [:search_type,
-                          :job_class_name,
-                          :search_for,
-                          :regex_search,
-                          :case_insensitive,
-                          :last_class_name,
-                          :last_job_id,
-                          :last_job_group].freeze
+        ALL_ATTRIBUTES = %i[search_type
+                            job_class_name
+                            search_for
+                            regex_search
+                            case_insensitive
+                            last_class_name
+                            last_job_id
+                            last_job_group].freeze
 
-        SEARCH_TYPES = %w(search_all search_job search_linear_history).freeze
+        SEARCH_TYPES = %w[search_all search_job search_linear_history].freeze
 
         DEFAULT_SEARCH_TIMEOUT = 10.seconds
 
@@ -33,9 +34,9 @@ module Resque
         def retry_search_settings(all_settings)
           settings = search_settings(all_settings)
 
-          [:last_class_name,
-           :last_job_id,
-           :last_job_group].each do |continue_setting|
+          %i[last_class_name
+             last_job_id
+             last_job_group].each do |continue_setting|
             settings.delete(continue_setting)
           end
 

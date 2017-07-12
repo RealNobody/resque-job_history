@@ -26,7 +26,7 @@ RSpec.describe Resque::Plugins::JobHistory::HistoryList do
 
       expect do
         expect { history_jobs.add_job(job_id, "CustomHistoryLengthJob") }.
-            not_to change { test_history_jobs.num_jobs }
+            not_to(change { test_history_jobs.num_jobs })
       end.to change { test_history_jobs.total }.by(1)
     end
 

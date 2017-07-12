@@ -12,11 +12,11 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
      ExcludeLiniearHistoryJob]
   end
   let(:all_invalid_jobs) do
-    %w(InvalidBasicJob
+    %w[InvalidBasicJob
        InvalidCustomHistoryLengthJob
        InvalidCustomPageSizeJob
        InvalidCustomPurgeAgeJob
-       InvalidExcludeLiniearHistoryJob)
+       InvalidExcludeLiniearHistoryJob]
   end
   let(:tester) { JobSummarySortTester.new self }
   let(:all_jobs) { (all_valid_jobs.map(&:name) | all_invalid_jobs).sample(1_000) }
@@ -60,7 +60,8 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
 
       expect(job.redis.keys("*#{other_job.job_id}*")).not_to be_blank
       expect(job.redis.keys("*#{job_id}*")).not_to be_blank
-      expect { cleaner.fixup_job_keys(job.class_name) }.not_to change { job.running_jobs.num_jobs }
+      expect { cleaner.fixup_job_keys(job.class_name) }.
+          not_to(change { job.running_jobs.num_jobs })
       expect(job.redis.keys("*#{job_id}*")).to be_blank
       expect(job.redis.keys("*#{other_job.job_id}*")).not_to be_blank
     end
@@ -73,7 +74,8 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
       job.linear_jobs.remove_job(job_id)
 
       expect(job.redis.keys("*#{job_id}*")).not_to be_blank
-      expect { cleaner.fixup_job_keys(job.class_name) }.not_to change { job.finished_jobs.num_jobs }
+      expect { cleaner.fixup_job_keys(job.class_name) }.
+          not_to(change { job.finished_jobs.num_jobs })
       expect(job.redis.keys("*#{job_id}*")).to be_blank
     end
 
@@ -84,7 +86,8 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
       job.finished_jobs.remove_job(job_id)
 
       expect(job.redis.keys("*#{job_id}*")).not_to be_blank
-      expect { cleaner.fixup_job_keys(job.class_name) }.not_to change { job.finished_jobs.num_jobs }
+      expect { cleaner.fixup_job_keys(job.class_name) }.
+          not_to(change { job.finished_jobs.num_jobs })
       expect(job.redis.keys("*#{job_id}*")).not_to be_blank
       expect(job.redis.keys("*#{job_id}*something stupid")).to be_blank
     end
@@ -96,7 +99,8 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
       job.purge
 
       expect(job.redis.keys("*#{job_id}*")).not_to be_blank
-      expect { cleaner.fixup_job_keys(job.class_name) }.not_to change { job.finished_jobs.num_jobs }
+      expect { cleaner.fixup_job_keys(job.class_name) }.
+          not_to(change { job.finished_jobs.num_jobs })
       expect(job.redis.keys("*#{job_id}*")).to be_blank
     end
 
@@ -111,7 +115,7 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
 
       expect(job.redis.keys("*#{job_id}*")).not_to be_blank
       expect { cleaner.fixup_job_keys(job.class_name) }.
-          not_to change { [job.running_jobs.num_jobs, job.finished_jobs.num_jobs, job.linear_jobs.num_jobs] }
+          not_to(change { [job.running_jobs.num_jobs, job.finished_jobs.num_jobs, job.linear_jobs.num_jobs] })
       expect(job.redis.keys("*#{job_id}*")).to be_blank
       expect(job.finished_jobs.num_jobs).to be >= 1
       expect(job.running_jobs.num_jobs).to be >= 1

@@ -16,13 +16,13 @@ inherit_from: .rubocop_todo.yml
 Metrics/LineLength:
   Max: 112
 
-Style/DotPosition:
+Layout/DotPosition:
   EnforcedStyle: trailing
 
-Style/MultilineMethodCallIndentation:
+Layout/MultilineMethodCallIndentation:
   Enabled: false
 
-Style/MultilineOperationIndentation:
+Layout/MultilineOperationIndentation:
   Enabled: false
 
 Style/StringLiterals:
@@ -42,8 +42,8 @@ Style/StringLiteralsInInterpolation:
     - double_quotes
 
 # Indentation of `when`.
-Style/CaseIndentation:
-  IndentWhenRelativeTo: case
+Layout/CaseIndentation:
+  EnforcedStyle: case
   SupportedStyles:
     - case
     - end
@@ -56,3 +56,7 @@ Style/CaseIndentation:
 Metrics/MethodLength:
   CountComments: false  # count full line comments?
   Max: 15
+
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*.rb"

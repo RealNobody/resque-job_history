@@ -5,6 +5,7 @@ SimpleCov.start
 
 require "spec_helper"
 require "cornucopia/rspec_hooks"
+require "active_job"
 require "resque-job_history"
 require "yaml"
 require "timecop"

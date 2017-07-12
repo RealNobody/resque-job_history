@@ -39,10 +39,10 @@ module Resque
       # recorded.
       module ClassMethods
         def around_perform_job_history(*args)
-          running_job = Resque::Plugins::JobHistory::Job.new(name, SecureRandom.uuid)
+          running_job = Resque::Plugins::JobHistory::Job.new(active_job_class_name(*args), SecureRandom.uuid)
 
           begin
-            running_job.start(*args)
+            running_job.start(*active_job_args(*args))
 
             yield if block_given?
 
@@ -74,7 +74,43 @@ module Resque
         def job_history
           Resque::Plugins::JobHistory::HistoryDetails.new(name)
         end
+
+        private
+
+        def job_class_has_history?(*args)
+          if Object.const_defined?("ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper") &&
+              self.is_a?(ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper)
+            args[-1]["job_class"].constantize.included_modules.include? Resque::Plugins::JobHistory
+          else
+            true
+          end
+        end
+
+        def active_job_class_name(*args)
+          if Object.const_defined?("ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper") &&
+              (self.is_a?(ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper) ||
+                  self == ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper)
+            args[-1]["job_class"]
+          else
+            name
+          end
+        end
+
+        def active_job_args(*args)
+          if Object.const_defined?("ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper") &&
+              self >= ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper
+            args[-1]["arguments"]
+          else
+            args
+          end
+        end
       end
     end
+  end
+end
+
+if Object.const_defined?("ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper")
+  unless ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper.included_modules.include? Resque::Plugins::JobHistory
+    ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper.include Resque::Plugins::JobHistory
   end
 end
