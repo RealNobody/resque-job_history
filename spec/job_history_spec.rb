@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "rails_helper"
+require "active_job"
 
 RSpec.describe Resque::Plugins::JobHistory do
   let(:all_jobs) do
@@ -78,7 +79,9 @@ RSpec.describe Resque::Plugins::JobHistory do
 
   describe ".around_perform_job_history" do
     let(:job_class) { BasicJob }
+    let(:perform_class) { job_class }
     let(:job) { Resque::Plugins::JobHistory::Job.new(job_class.name, SecureRandom.uuid) }
+    let(:perform_args) { test_args }
     let(:test_args) do
       rand_args = []
       rand_args << Faker::Lorem.sentence
@@ -114,51 +117,72 @@ RSpec.describe Resque::Plugins::JobHistory do
       rand_args
     end
 
-    before(:each) do
-      job
-      expect(Resque::Plugins::JobHistory::Job).to receive(:new).exactly(1).times.and_return job
-    end
-
-    it "yields to the passed in block" do
-      called = false
-
-      job_class.around_perform_job_history(*test_args) do
-        called = true
+    RSpec.shared_examples("performs job history") do
+      before(:each) do
+        job
+        expect(Resque::Plugins::JobHistory::Job).
+            to receive(:new).with(job_class.name, anything).exactly(1).times.and_return job
       end
 
-      expect(called).to be_truthy
-    end
+      it "yields to the passed in block" do
+        called = false
 
-    it "starts a job" do
-      expect(job).to receive(:start).with(*test_args).and_call_original
-
-      job_class.around_perform_job_history(*test_args) do
-      end
-    end
-
-    it "finishes a job" do
-      expect(job).to receive(:finish).and_call_original
-
-      job_class.around_perform_job_history(*test_args) do
-      end
-    end
-
-    it "re-raises any exception that is raised" do
-      expect do
-        job_class.around_perform_job_history(*test_args) do
-          raise StandardError, "This is an error"
+        perform_class.around_perform_job_history(*perform_args) do
+          called = true
         end
-      end.to raise_error StandardError, "This is an error"
+
+        expect(called).to be_truthy
+      end
+
+      it "starts a job" do
+        expect(job).to receive(:start).with(*test_args).and_call_original
+
+        perform_class.around_perform_job_history(*perform_args) do
+        end
+      end
+
+      it "finishes a job" do
+        expect(job).to receive(:finish).and_call_original
+
+        perform_class.around_perform_job_history(*perform_args) do
+        end
+      end
+
+      it "re-raises any exception that is raised" do
+        expect do
+          perform_class.around_perform_job_history(*perform_args) do
+            raise StandardError, "This is an error"
+          end
+        end.to raise_error StandardError, "This is an error"
+      end
+
+      it "records failures" do
+        expect(job).to receive(:failed).with(StandardError).and_call_original
+
+        expect do
+          perform_class.around_perform_job_history(*perform_args) do
+            raise StandardError, "This is an error"
+          end
+        end.to raise_error StandardError, "This is an error"
+      end
     end
 
-    it "records failures" do
-      expect(job).to receive(:failed).with(StandardError).and_call_original
+    context "not using active job" do
+      it_behaves_like "performs job history"
+    end
 
-      expect do
-        job_class.around_perform_job_history(*test_args) do
-          raise StandardError, "This is an error"
-        end
-      end.to raise_error StandardError, "This is an error"
+    context "using active job" do
+      let(:perform_args) do
+        [ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper,
+         { "job_class"  => job_class.name,
+           "job_id"     => SecureRandom.uuid,
+           "queue_name" => "some_queue",
+           "arguments"  => test_args,
+           "locale"     => "en" }]
+      end
+      let(:perform_class) { ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper }
+
+      it_behaves_like "performs job history"
     end
   end
 end

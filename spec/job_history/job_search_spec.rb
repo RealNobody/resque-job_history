@@ -330,13 +330,13 @@ RSpec.describe Resque::Plugins::JobHistory::JobSearch do
         last_job_group:   "last group name" }
     end
     let(:nil_setting) do
-      [:search_for,
-       :regex_search,
-       :case_insensitive,
-       :job_class_name,
-       :last_class_name,
-       :last_job_id,
-       :last_job_group].sample
+      %i[search_for
+         regex_search
+         case_insensitive
+         job_class_name
+         last_class_name
+         last_job_id
+         last_job_group].sample
     end
     let(:nilled_setting) do
       nilled = full_settings.dup
@@ -388,12 +388,12 @@ RSpec.describe Resque::Plugins::JobHistory::JobSearch do
         last_job_id:      "last job id",
         last_job_group:   "last group name" }
     end
-    let(:exclude_settings) { [:last_class_name, :last_job_id, :last_job_group] }
+    let(:exclude_settings) { %i[last_class_name last_job_id last_job_group] }
     let(:nil_setting) do
-      [:search_for,
-       :regex_search,
-       :case_insensitive,
-       :job_class_name].sample
+      %i[search_for
+         regex_search
+         case_insensitive
+         job_class_name].sample
     end
     let(:nilled_setting) do
       nilled = full_settings.dup

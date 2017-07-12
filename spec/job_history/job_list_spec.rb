@@ -11,11 +11,11 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
      ExcludeLiniearHistoryJob]
   end
   let(:all_invalid_jobs) do
-    %w(InvalidBasicJob
+    %w[InvalidBasicJob
        InvalidCustomHistoryLengthJob
        InvalidCustomPageSizeJob
        InvalidCustomPurgeAgeJob
-       InvalidExcludeLiniearHistoryJob)
+       InvalidExcludeLiniearHistoryJob]
   end
   let(:tester) { JobSummarySortTester.new self }
   let(:all_jobs) { (all_valid_jobs.map(&:name) | all_invalid_jobs).sample(1_000) }
@@ -28,7 +28,9 @@ RSpec.describe Resque::Plugins::JobHistory::JobList do
 
   describe "#order_param" do
     it "returns asc for any column other than the current one" do
-      expect(job_list.order_param("sort_option", "current_sort", %w(asc desc).sample)).to eq "asc"
+      expect(job_list.order_param("sort_option",
+                                  "current_sort",
+                                  %w[asc desc].sample)).to eq "asc"
     end
 
     it "returns desc for the current column if it is asc" do

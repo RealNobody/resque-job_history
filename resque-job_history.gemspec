@@ -25,6 +25,10 @@ Gem::Specification.new do |s|
   s.add_dependency "redis"
 
   # s.add_development_dependency "sqlite3"
+  s.add_development_dependency "actionpack"
+  s.add_development_dependency "activejob"
+  s.add_development_dependency "activesupport"
+  s.add_development_dependency "sinatra", "~> 1.4"
   s.add_development_dependency "rspec-rails"
   s.add_development_dependency "gem-release"
   s.add_development_dependency "simplecov"

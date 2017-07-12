@@ -84,7 +84,8 @@ RSpec.describe "search_results.erb" do
          regex_search:     "true",
          case_insensitive: "true"
 
-    expect(last_response.body).to be_include("href=\"/job history/job_class_details?class_name=CustomPageSizeJob\"")
+    expect(last_response.body).
+        to be_include("href=\"/job history/job_class_details?class_name=CustomPageSizeJob\"")
   end
 
   it "shows job results" do
@@ -94,7 +95,9 @@ RSpec.describe "search_results.erb" do
          regex_search:     "true",
          case_insensitive: "true"
 
-    expect(last_response.body).to be_include("href=\"/job history/job_details?class_name=CustomPageSizeJob&job_id=#{jobs[0][1].job_id}\"")
+    expect(last_response.body).
+        to be_include("href=\"/job history/job_details?class_name=CustomPageSizeJob&job_id" \
+                              "=#{jobs[0][1].job_id}\"")
   end
 
   it "shows no reults" do

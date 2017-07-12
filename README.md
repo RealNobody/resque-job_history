@@ -23,7 +23,7 @@ Installation
 
 Add the gem to your Gemfile:
 
-```
+```Ruby
 gem "resque-job_history"
 ```
 
@@ -34,7 +34,7 @@ Usage
 
 Simply include the JobHistory class in the class that is enqueued to Resque:
 
-```
+```Ruby
 include Resque::Plugins::JobHistory
 ```
 
@@ -43,7 +43,7 @@ include Resque::Plugins::JobHistory
 To add the server tab and views to Resqueue, add include the file
 `resque/job_history_server` to your `routes.rb` file.
 
-```
+```Ruby
 require "resque/job_history_server"
 ```
 
@@ -55,7 +55,7 @@ Options
 You can customize a number of options for each job that the `JobHistory`
 module is included in.
 
-```
+```Ruby
 class MyResqueJob
   include Resque::Plugins::JobHistory
 
@@ -73,7 +73,7 @@ the oldest job from the list if the number of jobs exceeds this value.
 
 Usage:
 
-```
+```Ruby
 @job_history_len = 200
 ```
 
@@ -89,7 +89,7 @@ the job is not actually running.
 
 Usage:
 
-```
+```Ruby
 @purge_age = 24.hours
 ```
 
@@ -99,7 +99,7 @@ If this is set to true, then the job will not appear in the linear history.
 
 Usage:
 
-```
+```Ruby
 @exclude_from_linear_history = false
 ```
 
@@ -110,7 +110,7 @@ for the job.
 
 Usage:
 
-```
+```Ruby
 @page_size = 25
 ```
 
@@ -130,7 +130,7 @@ even if this exceeds the number of instance that show up for the class.
 
 Usage:
 
-```
+```Ruby
 Resque::Plugins::JobHistory::HistoryDetails.max_linear_job = 500
 ```
 
@@ -311,6 +311,36 @@ search.search while search.more_records?
 # Access the results.
 search.class_results
 search.run_results
+```
+
+# ActiveJob
+
+A note on ActiveJob.
+
+If ActiveJob is being used, this gem will try to accomodate the usage of ActiveJob as best it can.
+
+As long as ActiveJob has been required before this plugin is required, `Resque::Plugins::JobHistory`
+will be included in the job that ActiveJob uses with Resque to execute jobs.
+
+Then, when this job executes a job, the arguments will be unpacked, and the history will be recorded
+against the actual job being run and the arguments to that job rather than the singleton shared
+ActiveJob class.
+
+Additionally, histories will only be recorded against jobs which include
+`Resque::Plugins::JobHistory`.
+
+There is a problem with this however.  I do not think that the
+`ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper` class and how the attributes are serialized
+are intended to be public.  That is, the class and how it is serialized could probably change.  If
+you are using this gem and ActiveJob, and it stops working, please let me know and I will update it.
+
+If you use ActiveJob and you are not getting histories, it could be caused by the order in which
+things where required.  If so, please try adding an initializer with the following code:
+
+```Ruby
+  unless ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper.included_modules.include? Resque::Plugins::JobHistory
+    ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper.include Resque::Plugins::JobHistory
+  end
 ```
 
 ## Contributing
