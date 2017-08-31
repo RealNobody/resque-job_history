@@ -115,8 +115,7 @@ module Resque
 
         def exception_message(exception)
           if exception.is_a?(Resque::DirtyExit)
-            ("#{exception.message}\n\n#{exception.process_status&.message}\n\n" +
-                Array.wrap(exception.process_status&.backtrace).join("\n")).strip
+            "#{exception.message}\n\n#{exception.process_status.to_s}".strip
           else
             exception.message
           end

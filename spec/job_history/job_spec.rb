@@ -273,20 +273,14 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
 
     describe "failed" do
       it "includes the backtrace for DirtyExit" do
-        test_error = nil
-
-        begin
-          raise StandardError, error_message
-        rescue StandardError => dirty_error
-          test_error = Resque::DirtyExit.new("Testing DirtyExit", dirty_error)
-        end
+        process_status = instance_double(Process::Status, to_s: "process failed")
+        test_error     = Resque::DirtyExit.new("Testing DirtyExit simple", process_status)
 
         job.start
         job.failed(test_error)
 
         expect(test_job.error).to be_include("Testing DirtyExit")
-        expect(test_job.error).to be_include(error_message)
-        expect(test_job.error).to be_include("job_spec.rb:#{__LINE__ - 10}")
+        expect(test_job.error).to be_include("process failed")
       end
 
       it "includes the DirtyExit message if no process_status" do
