@@ -117,6 +117,72 @@ RSpec.describe Resque::Plugins::JobHistory do
       rand_args
     end
 
+    RSpec.shared_examples("records failures") do
+      let(:args) { Array.new(5) { |index| index } }
+
+      it "does not record a new error if the job has already failed" do
+        job.start(*test_args)
+        job.failed StandardError.new("Initial failure")
+
+        perform_class.most_recent_job = job
+        perform_class.on_failure_job_history(StandardError.new("secondary failure"), *perform_args)
+
+        expect(job.error).to eq "Initial failure"
+      end
+
+      it "does record a new error if the job has finished without an error" do
+        job.start(*test_args)
+        job.finish
+
+        perform_class.most_recent_job = job
+        perform_class.on_failure_job_history(StandardError.new("secondary failure"), *perform_args)
+
+        expect(job.error).to eq "secondary failure"
+      end
+
+      it "records a failure" do
+        job.start(*test_args)
+
+        perform_class.most_recent_job = job
+        perform_class.on_failure_job_history(StandardError.new("secondary failure"), *perform_args)
+
+        expect(job.error).to eq "secondary failure"
+        expect(job).to be_finished
+      end
+
+      it "searches for a running job" do
+        job.start(*test_args)
+
+        perform_class.most_recent_job = nil
+        perform_class.on_failure_job_history(StandardError.new("secondary failure"), *perform_args)
+
+        expect(job.error).to eq "secondary failure"
+        expect(job).to be_finished
+      end
+
+      it "does nothing if there are no running jobs" do
+        job.start(*test_args)
+        job.finish
+
+        perform_class.most_recent_job = nil
+        perform_class.on_failure_job_history(StandardError.new("secondary failure"), *perform_args)
+
+        expect(job.error).not_to be
+        expect(job).to be_finished
+      end
+
+      it "does nothing if there are multiple jobs" do
+        job.start(*test_args)
+        Resque::Plugins::JobHistory::Job.new(job_class.name, SecureRandom.uuid).start(*test_args)
+
+        perform_class.most_recent_job = nil
+        perform_class.on_failure_job_history(StandardError.new("secondary failure"), *perform_args)
+
+        expect(job.error).not_to be
+        expect(job).not_to be_finished
+      end
+    end
+
     RSpec.shared_examples("performs job history") do
       before(:each) do
         job
@@ -169,6 +235,7 @@ RSpec.describe Resque::Plugins::JobHistory do
 
     context "not using active job" do
       it_behaves_like "performs job history"
+      it_behaves_like "records failures"
     end
 
     context "using active job" do
@@ -183,6 +250,7 @@ RSpec.describe Resque::Plugins::JobHistory do
       let(:perform_class) { ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper }
 
       it_behaves_like "performs job history"
+      it_behaves_like "records failures"
     end
   end
 end

@@ -38,8 +38,22 @@ module Resque
       # The class methods added to the job class that is being enqueued and whose history is to be
       # recorded.
       module ClassMethods
+        def on_failure_job_history(error, *args)
+          job_class_name = active_job_class_name(*args)
+          job_args       = *active_job_args(*args)
+
+          failed_job = find_failed_job(job_args, job_class_name)
+
+          return unless failed_job
+          return if failed_job.finished? && failed_job.error.present?
+
+          failed_job.failed(error)
+        end
+
         def around_perform_job_history(*args)
-          running_job = Resque::Plugins::JobHistory::Job.new(active_job_class_name(*args), SecureRandom.uuid)
+          running_job          = Resque::Plugins::JobHistory::Job.new(active_job_class_name(*args),
+                                                                      SecureRandom.uuid)
+          self.most_recent_job = running_job
 
           begin
             running_job.start(*active_job_args(*args))
@@ -52,6 +66,7 @@ module Resque
             raise
           ensure
             running_job.cancel unless running_job.finished? || running_job.error
+            self.most_recent_job = nil
           end
         end
 
@@ -75,11 +90,19 @@ module Resque
           Resque::Plugins::JobHistory::HistoryDetails.new(name)
         end
 
+        def most_recent_job=(job)
+          @most_recent_job = job
+        end
+
+        def most_recent_job
+          @most_recent_job
+        end
+
         private
 
         def job_class_has_history?(*args)
           if Object.const_defined?("ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper") &&
-              self.is_a?(ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper)
+              self >= ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper
             args[-1]["job_class"].constantize.included_modules.include? Resque::Plugins::JobHistory
           else
             true
@@ -88,8 +111,7 @@ module Resque
 
         def active_job_class_name(*args)
           if Object.const_defined?("ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper") &&
-              (self.is_a?(ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper) ||
-                  self == ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper)
+              self >= ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper
             args[-1]["job_class"]
           else
             name
@@ -104,13 +126,27 @@ module Resque
             args
           end
         end
+
+        def find_failed_job(job_args, job_class_name)
+          recent_job = most_recent_job
+
+          if recent_job&.class_name == job_class_name && recent_job&.args == job_args
+            recent_job
+          else
+            running_list  = HistoryList.new(job_class_name, "running")
+            possible_jobs = running_list.jobs.select { |job| job.args == job_args }
+
+            possible_jobs.length == 1 ? possible_jobs.first : nil
+          end
+        end
       end
     end
   end
 end
 
 if Object.const_defined?("ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper")
-  unless ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper.included_modules.include? Resque::Plugins::JobHistory
+  unless ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper.included_modules.
+      include? Resque::Plugins::JobHistory
     ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper.include Resque::Plugins::JobHistory
   end
 end

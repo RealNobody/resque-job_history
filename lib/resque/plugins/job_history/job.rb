@@ -70,7 +70,7 @@ module Resque
         end
 
         def failed(exception)
-          redis.hset(job_key, "error", exception.message)
+          redis.hset(job_key, "error", exception_message(exception))
           redis.incr(total_failed_key)
 
           finish
@@ -112,6 +112,15 @@ module Resque
         end
 
         private
+
+        def exception_message(exception)
+          if exception.is_a?(Resque::DirtyExit)
+            ("#{exception.message}\n\n#{exception.process_status&.message}\n\n" +
+                Array.wrap(exception.process_status&.backtrace).join("\n")).strip
+          else
+            exception.message
+          end
+        end
 
         def remove_from_job_lists
           running_jobs.remove_job(job_id)
