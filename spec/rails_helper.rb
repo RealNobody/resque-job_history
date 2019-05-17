@@ -14,7 +14,7 @@ require "rack/test"
 require "resque/server"
 require "resque/job_history_server"
 
-Dir[File.expand_path("spec/support/**/*.rb"), File.dirname(__FILE__)].each do |f|
+Dir[File.expand_path("spec/support/**/*.rb"), File.dirname(__FILE__)].sort.each do |f|
   require f unless File.directory?(f)
 end
 
