@@ -41,7 +41,7 @@ module Resque
         job_history_params(base)
 
         base.class_eval do
-          get "/job%20history" do
+          get "/job history" do
             set_job_history_params
 
             erb File.read(Resque::JobHistoryServer.erb_path("job_history.erb"))
@@ -67,7 +67,7 @@ module Resque
         finished_page_params(base)
 
         base.class_eval do
-          get "/job%20history/job_class_details" do
+          get "/job history/job_class_details" do
             set_class_details_params
 
             erb File.read(Resque::JobHistoryServer.erb_path("job_class_details.erb"))
@@ -107,7 +107,7 @@ module Resque
 
       def job_details(base)
         base.class_eval do
-          get "/job%20history/job_details" do
+          get "/job history/job_details" do
             @job_class_name = params[:class_name]
             @job_id         = params[:job_id]
 
@@ -118,7 +118,7 @@ module Resque
 
       def linear_list(base)
         base.class_eval do
-          get "/job%20history/linear_history" do
+          get "/job history/linear_history" do
             @page_num  = (params[:page_num] || 1).to_i
             @page_size = (params[:page_size] ||
                 Resque::Plugins::JobHistory::HistoryDetails.linear_page_size).to_i
@@ -130,7 +130,7 @@ module Resque
 
       def add_static_files(base)
         base.class_eval do
-          get %r{job_history/public/([a-z_]+\.[a-z]+)} do
+          get %r{/job_history/public/([a-z_]+\.[a-z]+)} do
             send_file Resque::JobHistoryServer.public_path(params[:captures].first)
           end
         end
@@ -150,7 +150,7 @@ module Resque
 
       def cancel_job(base)
         base.class_eval do
-          post "/job%20history/cancel_job" do
+          post "/job history/cancel_job" do
             Resque::Plugins::JobHistory::Job.new(params[:class_name], params[:job_id]).cancel
 
             redirect u("job history/job_details?#{{ class_name: params[:class_name],
@@ -161,7 +161,7 @@ module Resque
 
       def delete_job(base)
         base.class_eval do
-          post "/job%20history/delete_job" do
+          post "/job history/delete_job" do
             Resque::Plugins::JobHistory::Job.new(params[:class_name], params[:job_id]).purge
 
             redirect u("job history/job_class_details?#{{ class_name: params[:class_name] }.to_param}")
@@ -171,7 +171,7 @@ module Resque
 
       def retry_job(base)
         base.class_eval do
-          post "/job%20history/retry_job" do
+          post "/job history/retry_job" do
             Resque::Plugins::JobHistory::Job.new(params[:class_name], params[:job_id]).retry
 
             redirect u("job history/job_class_details?#{{ class_name: params[:class_name] }.to_param}")
@@ -181,7 +181,7 @@ module Resque
 
       def purge_class(base)
         base.class_eval do
-          post "/job%20history/purge_class" do
+          post "/job history/purge_class" do
             Resque::Plugins::JobHistory::Cleaner.purge_class(params[:class_name])
 
             redirect u("job history")
@@ -191,7 +191,7 @@ module Resque
 
       def purge_all(base)
         base.class_eval do
-          post "/job%20history/purge_all" do
+          post "/job history/purge_all" do
             Resque::Plugins::JobHistory::Cleaner.purge_all_jobs
 
             redirect u("job history")
@@ -201,7 +201,7 @@ module Resque
 
       def purge_linear_history(base)
         base.class_eval do
-          post "/job%20history/purge_linear_history" do
+          post "/job history/purge_linear_history" do
             Resque::Plugins::JobHistory::Cleaner.purge_linear_history
 
             redirect u("job history")
@@ -211,7 +211,7 @@ module Resque
 
       def search_all(base)
         base.class_eval do
-          post "/job%20history/search_all" do
+          post "/job history/search_all" do
             @job_search = Resque::Plugins::JobHistory::JobSearch.new(params)
 
             @job_search.search
@@ -223,7 +223,7 @@ module Resque
 
       def search_job(base)
         base.class_eval do
-          post "/job%20history/search_job" do
+          post "/job history/search_job" do
             @job_search = Resque::Plugins::JobHistory::JobSearch.new(params)
 
             @job_search.search
@@ -235,7 +235,7 @@ module Resque
 
       def search_linear_history(base)
         base.class_eval do
-          post "/job%20history/search_linear_history" do
+          post "/job history/search_linear_history" do
             @job_search = Resque::Plugins::JobHistory::JobSearch.new(params)
 
             @job_search.search
