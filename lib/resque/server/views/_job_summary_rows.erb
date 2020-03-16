@@ -26,7 +26,7 @@
     <td>
       <% if class_info.last_run %>
         <% if class_info.last_run.finished? %>
-          <%= distance_of_time_in_words(class_info.last_run.start_time, class_info.last_run.end_time) %>
+          <%= distance_of_time_in_words((class_info.last_run.start_time || Time.now), (class_info.last_run.end_time || Time.now)) %>
           (<%= class_info.last_run.end_time %>)
         <% else %>
           Still running...
