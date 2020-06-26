@@ -86,11 +86,13 @@ module Resque
         end
 
         def delete_old_jobs(job_count)
-          while job_count > max_jobs
-            job_id = redis.rpop(job_list_key)
+          while num_jobs > max_jobs
+            job_id         = redis.rpop(job_list_key)
+            job_class_name = job_class(job_id)
+
             remove_job_data(job_id)
 
-            Resque::Plugins::JobHistory::Job.new(job_class(job_id), job_id).safe_purge
+            Resque::Plugins::JobHistory::Job.new(job_class_name, job_id).safe_purge
 
             job_count -= 1
           end

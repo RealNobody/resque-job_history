@@ -173,4 +173,36 @@ RSpec.describe Resque::Plugins::JobHistory::HistoryList do
       expect(test_history_jobs.latest_job.class_name).to eq "NotCustomHistoryLengthJob"
     end
   end
+
+  context "linear history" do
+    let(:history_jobs) { Resque::Plugins::JobHistory::HistoryList.new "", "test", 40 }
+    let(:test_history_jobs) { Resque::Plugins::JobHistory::HistoryList.new "", "test" }
+    # let(:job_list) { Resque::Plugins::JobHistory::JobList.new }
+    let(:job_id) { SecureRandom.uuid }
+
+    describe "add_job" do
+      it "saves the class name for the job" do
+        history_jobs.add_job job_id, "LinearOneJob"
+
+        jobs = history_jobs.jobs
+        expect(jobs.length).to eq 1
+        expect(jobs[0].class_name).to eq "LinearOneJob"
+      end
+
+      it "deletes old jobs properly" do
+        history_jobs.add_job job_id, "LinearThreeJob"
+        39.times { history_jobs.add_job SecureRandom.uuid, "LinearOneJob" }
+
+        jobs = history_jobs.jobs
+        expect(jobs.length).to eq 40
+
+        allow(Resque::Plugins::JobHistory::Job).to receive(:new).and_call_original
+        history_jobs.add_job SecureRandom.uuid, "LinearTwoJob"
+        expect(Resque::Plugins::JobHistory::Job).to have_received(:new).with("LinearThreeJob", job_id.to_s)
+      end
+
+      it "deletes job off the end of the list" do
+      end
+    end
+  end
 end

@@ -282,8 +282,9 @@ RSpec.describe Resque::Plugins::JobHistory::Cleaner do
     end
 
     it "fixes linear keys" do
-      expect(cleaner).to receive(:fixup_linear_keys).and_call_original
+      allow(cleaner).to receive(:fixup_linear_keys).and_call_original
       cleaner.purge_linear_history
+      expect(cleaner).to have_received(:fixup_linear_keys)
     end
 
     it "purges unknown keys" do
