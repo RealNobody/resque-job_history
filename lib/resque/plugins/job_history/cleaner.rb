@@ -48,6 +48,8 @@ module Resque
               purge_class class_name
             end
 
+            purge_linear_history
+
             del_key(Resque::Plugins::JobHistory::HistoryDetails.job_history_key, "Purging job_history_key")
 
             redis.keys("*").each do |key|

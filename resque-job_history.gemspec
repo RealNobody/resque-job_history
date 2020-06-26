@@ -5,7 +5,7 @@ $LOAD_PATH.push File.expand_path("../lib", __FILE__)
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
   s.name        = "resque-job_history"
-  s.version     = "0.0.17"
+  s.version     = "0.0.18"
   s.authors     = ["RealNobody"]
   s.email       = ["RealNobody1@cox.net"]
   s.homepage    = "https://github.com/RealNobody"

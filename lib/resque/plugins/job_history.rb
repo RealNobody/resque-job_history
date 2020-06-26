@@ -10,7 +10,7 @@ module Resque
     module JobHistory
       extend ActiveSupport::Concern
 
-      # Redis mapp:
+      # Redis map:
       #   job_history - a set of all of the class names of all jobs
       #   job_history..linear_jobs - a list of the IDs for all jobs that have run in the order
       #                                          they were started.
