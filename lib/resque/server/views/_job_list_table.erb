@@ -39,7 +39,7 @@
           <% end %>
         </td>
         <td>
-          <pre><code><%= "".html_safe + job_details.args.to_yaml %></code></pre>
+          <pre><code><%= "".html_safe + job_details.uncompressed_args.to_yaml %></code></pre>
         </td>
         <td>
           <%= job_details.error %>
