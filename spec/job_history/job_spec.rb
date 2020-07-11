@@ -493,4 +493,35 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
       expect(test_job.start_time).not_to be
     end
   end
+
+  describe "uncompressed_args" do
+    let(:compressed_args) { [{ :resque_compressed => true, :payload => CustomHistoryLengthJob.compressed_args(test_args) }] }
+
+    it "decompresses args" do
+      job_with_args = Resque::Plugins::JobHistory::Job.new("CustomHistoryLengthJob", job_id)
+
+      job_with_args.start(*compressed_args)
+      test_job_with_args = Resque::Plugins::JobHistory::Job.new("CustomHistoryLengthJob", job_id)
+
+      expect(test_job_with_args.uncompressed_args).to eq test_args
+    end
+
+    it "does not decompress args if not compressed" do
+      job_with_args = Resque::Plugins::JobHistory::Job.new("CustomHistoryLengthJob", job_id)
+
+      job_with_args.start(*test_args)
+      test_job_with_args = Resque::Plugins::JobHistory::Job.new("CustomHistoryLengthJob", job_id)
+
+      expect(test_job_with_args.uncompressed_args).to eq test_args
+    end
+
+    it "does not decompress args if not compressable" do
+      job_with_args = Resque::Plugins::JobHistory::Job.new("ExcludeLiniearHistoryJob", job_id)
+
+      job_with_args.start(*compressed_args)
+      test_job_with_args = Resque::Plugins::JobHistory::Job.new("ExcludeLiniearHistoryJob", job_id)
+
+      expect(test_job_with_args.uncompressed_args).to eq [compressed_args.first.stringify_keys]
+    end
+  end
 end

@@ -44,6 +44,14 @@ module Resque
           decode_args(stored_values[:args])
         end
 
+        def uncompressed_args
+          return args if described_class.blank?
+          return args unless described_class.singleton_class.included_modules.map(&:name).include?("Resque::Plugins::Compressible")
+          return args unless described_class.compressed?(args)
+
+          described_class.uncompressed_args(args.first[:payload] || args.first["payload"])
+        end
+
         def error
           stored_values[:error]
         end

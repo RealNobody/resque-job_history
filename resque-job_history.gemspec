@@ -5,7 +5,7 @@ $LOAD_PATH.push File.expand_path("../lib", __FILE__)
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
   s.name        = "resque-job_history"
-  s.version     = "0.0.18"
+  s.version     = "0.0.19"
   s.authors     = ["RealNobody"]
   s.email       = ["RealNobody1@cox.net"]
   s.homepage    = "https://github.com/RealNobody"
@@ -26,13 +26,14 @@ Gem::Specification.new do |s|
   s.add_development_dependency "actionpack"
   s.add_development_dependency "activejob"
   s.add_development_dependency "activesupport"
-  s.add_development_dependency "rspec-rails", ">= 3.6.0"
-  s.add_development_dependency "gem-release"
-  s.add_development_dependency "simplecov"
   s.add_development_dependency "cornucopia"
-  s.add_development_dependency "rubocop"
-  s.add_development_dependency "haml-lint"
-  s.add_development_dependency "timecop"
   s.add_development_dependency "faker"
+  s.add_development_dependency "gem-release"
+  s.add_development_dependency "haml-lint"
   s.add_development_dependency "rack-test"
+  s.add_development_dependency "resque-compressible"
+  s.add_development_dependency "rspec-rails", ">= 3.6.0"
+  s.add_development_dependency "rubocop"
+  s.add_development_dependency "simplecov"
+  s.add_development_dependency "timecop"
 end
