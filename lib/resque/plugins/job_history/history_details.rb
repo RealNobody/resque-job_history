@@ -68,8 +68,7 @@ module Resque
         end
 
         def linear_jobs
-          @linear_list ||= HistoryList.new("", "linear",
-                                           Resque::Plugins::JobHistory::HistoryDetails.max_linear_jobs)
+          @linear_list ||= HistoryList.new("", "linear", Resque::Plugins::JobHistory::HistoryDetails.max_linear_jobs)
         end
 
         def max_concurrent_jobs
@@ -111,7 +110,6 @@ module Resque
             job_start = job.start_time
 
             if job_start.blank? || job_start.to_time < too_old_time
-              job.start(*job.args) if job_start.blank?
               job.cancel
             end
           end

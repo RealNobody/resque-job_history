@@ -51,8 +51,7 @@ module Resque
         end
 
         def around_perform_job_history(*args)
-          running_job          = Resque::Plugins::JobHistory::Job.new(active_job_class_name(*args),
-                                                                      SecureRandom.uuid)
+          running_job          = Resque::Plugins::JobHistory::Job.new(active_job_class_name(*args), SecureRandom.uuid)
           self.most_recent_job = running_job
 
           begin

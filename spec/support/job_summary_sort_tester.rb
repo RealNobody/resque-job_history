@@ -28,9 +28,7 @@ class JobSummarySortTester
       jobs = get_jobs(job_list, field_name, "asc", index)
 
       jobs.each do |job|
-        unless prev_value.blank?
-          tester.expect(job.last_run.send(method_name)).to tester.be >= prev_value
-        end
+        tester.expect(job.last_run.send(method_name)).to tester.be >= prev_value unless prev_value.blank?
 
         prev_value = job.last_run.send(method_name)
       end
@@ -43,9 +41,7 @@ class JobSummarySortTester
       jobs = get_jobs(job_list, field_name, "desc", index)
 
       jobs.each do |job|
-        unless prev_value.blank?
-          tester.expect(job.public_send(field_name.to_sym)).to tester.be <= prev_value
-        end
+        tester.expect(job.public_send(field_name.to_sym)).to tester.be <= prev_value unless prev_value.blank?
 
         prev_value = job.public_send(field_name.to_sym)
       end
@@ -62,9 +58,7 @@ class JobSummarySortTester
       jobs = get_jobs(job_list, field_name, "desc", index)
 
       jobs.each do |job|
-        unless prev_value.blank?
-          tester.expect(job.last_run.send(method_name)).to tester.be <= prev_value
-        end
+        tester.expect(job.last_run.send(method_name)).to tester.be <= prev_value unless prev_value.blank?
 
         prev_value = job.last_run.send(method_name)
       end

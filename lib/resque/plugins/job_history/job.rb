@@ -57,10 +57,11 @@ module Resque
         end
 
         def start(*args)
+          record_job_start(*args)
+
           num_jobs = running_jobs.add_job(job_id, class_name)
           linear_jobs.add_job(job_id, class_name) unless class_exclude_from_linear_history
 
-          record_job_start(*args)
           record_num_jobs(num_jobs)
 
           self
@@ -143,11 +144,7 @@ module Resque
         end
 
         def stored_values
-          unless @stored_values
-            @stored_values = redis.hgetall(job_key).with_indifferent_access
-          end
-
-          @stored_values
+          @stored_values ||= redis.hgetall(job_key).with_indifferent_access
         end
 
         def encode_args(*args)
