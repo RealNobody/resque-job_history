@@ -65,7 +65,10 @@ module Resque
             running_job.failed exception, start_time, *args
             raise
           ensure
-            running_job.cancel(" Job did not signal completion on finish.", start_time, *args) unless running_job.finished? || running_job.error
+            if running_job.present? && !running_job.finished? && !running_job.error
+              running_job.cancel(" Job did not signal completion on finish.", start_time, *args)
+            end
+
             self.most_recent_job = nil
           end
         end

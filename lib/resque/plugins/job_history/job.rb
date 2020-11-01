@@ -28,6 +28,10 @@ module Resque
           stored_values[:end_time].present?
         end
 
+        def blank?
+          !redis.exists job_key
+        end
+
         def succeeded?
           error.blank?
         end
@@ -72,7 +76,7 @@ module Resque
             record_job_start(start_time, *args)
           end
 
-          if redis.exists(job_key)
+          if present?
             redis.hset(job_key, "end_time", Time.now.utc.to_s)
             finished_jobs.add_job(job_id, class_name)
           end
@@ -89,7 +93,7 @@ module Resque
             record_job_start(start_time, *args)
           end
 
-          redis.hset(job_key, "error", exception_message(exception)) if redis.exists(job_key)
+          redis.hset(job_key, "error", exception_message(exception)) if present?
           redis.incr(total_failed_key)
 
           finish
@@ -106,7 +110,7 @@ module Resque
             record_job_start(start_time, *args)
           end
 
-          if redis.exists(job_key)
+          if present?
             redis.hset(job_key,
                        "error",
                        "Unknown - Job failed to signal ending after the configured purge time or was canceled manually.#{caller_message}")
