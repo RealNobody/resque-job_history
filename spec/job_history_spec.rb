@@ -223,7 +223,7 @@ RSpec.describe Resque::Plugins::JobHistory do
       end
 
       it "records failures" do
-        expect(job).to receive(:failed).with(StandardError).and_call_original
+        expect(job).to receive(:failed).with(StandardError, instance_of(Time), *perform_args).and_call_original
 
         expect do
           perform_class.around_perform_job_history(*perform_args) do

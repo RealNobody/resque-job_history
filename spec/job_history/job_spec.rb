@@ -258,6 +258,28 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
         expect { job.finish }.to change { test_job.finished_jobs.num_jobs }.by(1)
       end
 
+      it "adds the job to the finished list if purged" do
+        job.start
+        job.purge
+
+        Timecop.freeze do
+          expect { job.finish(1.hour.ago) }.to change { test_job.finished_jobs.num_jobs }.by(1)
+          expect(test_job.start_time).to be_within(1.second).of(1.hour.ago)
+          expect(test_job.args).to eq []
+        end
+      end
+
+      it "adds the job args to the finished list if purged" do
+        job.start
+        job.purge
+
+        Timecop.freeze do
+          expect { job.finish(1.hour.ago, "yes", 1) }.to change { test_job.finished_jobs.num_jobs }.by(1)
+          expect(test_job.start_time).to be_within(1.second).of(1.hour.ago)
+          expect(test_job.args).to eq ["yes", 1]
+        end
+      end
+
       it "removes the job from the running list" do
         job.start
 
@@ -319,6 +341,36 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
 
         expect(test_job.finished?).to be_truthy
       end
+
+      it "re-adds purged jobs" do
+        job.start
+        job.purge
+
+        Timecop.freeze do
+          jobs = job.finished_jobs.num_jobs
+
+          job.failed(StandardError.new(error_message), 1.hour.ago)
+
+          expect(test_job.finished_jobs.num_jobs).to eq jobs + 1
+          expect(test_job.start_time).to be_within(1.second).of(1.hour.ago)
+          expect(test_job.args).to eq []
+        end
+      end
+
+      it "re-adds purged jobs args" do
+        job.start
+        job.purge
+
+        Timecop.freeze do
+          jobs = job.finished_jobs.num_jobs
+
+          job.failed(StandardError.new(error_message), 1.hour.ago, "yes", 1)
+
+          expect(test_job.finished_jobs.num_jobs).to eq jobs + 1
+          expect(test_job.start_time).to be_within(1.second).of(1.hour.ago)
+          expect(test_job.args).to eq ["yes", 1]
+        end
+      end
     end
 
     describe "cancel" do
@@ -348,6 +400,36 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
         job.cancel
 
         expect(test_job.finished?).to be_truthy
+      end
+
+      it "re-adds purged jobs" do
+        job.start
+        job.purge
+
+        Timecop.freeze do
+          jobs = job.finished_jobs.num_jobs
+
+          job.cancel "", 1.hour.ago
+
+          expect(test_job.finished_jobs.num_jobs).to eq jobs + 1
+          expect(test_job.start_time).to be_within(1.second).of(1.hour.ago)
+          expect(test_job.args).to eq []
+        end
+      end
+
+      it "re-adds purged jobs args" do
+        job.start
+        job.purge
+
+        Timecop.freeze do
+          jobs = job.finished_jobs.num_jobs
+
+          job.cancel "", 1.hour.ago, "yes", 1
+
+          expect(test_job.finished_jobs.num_jobs).to eq jobs + 1
+          expect(test_job.start_time).to be_within(1.second).of(1.hour.ago)
+          expect(test_job.args).to eq ["yes", 1]
+        end
       end
     end
 
@@ -388,7 +470,7 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
       it "cancels a running job" do
         job.start
 
-        expect(job).to receive(:cancel).and_return nil
+        expect(job).to receive(:abort).and_return nil
 
         expect { job.purge }.to change { test_job.running_jobs.num_jobs }.by(-1)
       end
@@ -403,6 +485,7 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
       it "deletes job data" do
         job.start(*test_args)
 
+        expect(job).not_to receive(:finish)
         job.purge
 
         expect(test_job.start_time).to be_nil
@@ -504,6 +587,12 @@ RSpec.describe Resque::Plugins::JobHistory::Job do
       test_job_with_args = Resque::Plugins::JobHistory::Job.new("CustomHistoryLengthJob", job_id)
 
       expect(test_job_with_args.uncompressed_args).to eq test_args
+    end
+
+    it "returns nil if purged" do
+      test_job_with_args = Resque::Plugins::JobHistory::Job.new("CustomHistoryLengthJob", job_id)
+
+      expect(test_job_with_args.uncompressed_args).to be_nil
     end
 
     it "does not decompress args if not compressed" do

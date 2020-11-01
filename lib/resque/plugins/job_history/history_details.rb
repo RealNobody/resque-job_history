@@ -109,8 +109,8 @@ module Resque
           running_jobs.jobs.each do |job|
             job_start = job.start_time
 
-            if job_start.blank? || job_start.to_time < too_old_time
-              job.cancel
+            if job_start.present? && job_start.to_time < too_old_time
+              job.cancel " Job timed out."
             end
           end
         end

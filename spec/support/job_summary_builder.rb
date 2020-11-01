@@ -57,12 +57,7 @@ class JobSummaryBuilder
       build_running_job(class_name)
     end
 
-    jobs.each do |job|
-      job.purge
-
-      @total_failed   += 1
-      @total_finished += 1
-    end
+    jobs.each(&:purge)
   end
 
   def total_finished_in_list

@@ -82,7 +82,7 @@ class JobSummarySortTester
 
   def test_summary_key_values(actual_summary, expected_summary)
     (expected_summary.keys - [:last_run]).each do |key|
-      tester.expect(actual_summary.public_send(key.to_sym)).to tester.eq expected_summary[key]
+      tester.expect("#{key}: #{actual_summary.public_send(key.to_sym)}").to tester.eq "#{key}: #{expected_summary[key]}"
     end
   end
 end

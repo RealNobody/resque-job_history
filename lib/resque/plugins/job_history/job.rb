@@ -33,7 +33,7 @@ module Resque
         end
 
         def duration
-          (end_time || Time.now) - start_time
+          (end_time || Time.now) - (start_time || Time.now)
         end
 
         def end_time
@@ -45,7 +45,7 @@ module Resque
         end
 
         def uncompressed_args
-          return args if described_class.blank?
+          return args if described_class.blank? || args.blank?
           return args unless described_class.singleton_class.included_modules.map(&:name).include?("Resque::Plugins::Compressible")
           return args unless described_class.compressed?(args)
 
@@ -57,7 +57,7 @@ module Resque
         end
 
         def start(*args)
-          record_job_start(*args)
+          record_job_start(Time.now.utc.to_s, *args)
 
           num_jobs = running_jobs.add_job(job_id, class_name)
           linear_jobs.add_job(job_id, class_name) unless class_exclude_from_linear_history
@@ -67,10 +67,16 @@ module Resque
           self
         end
 
-        def finish
-          redis.hset(job_key, "end_time", Time.now.utc.to_s)
+        def finish(start_time = nil, *args)
+          if start_time.present?
+            record_job_start(start_time, *args)
+          end
 
-          finished_jobs.add_job(job_id, class_name)
+          if redis.exists(job_key)
+            redis.hset(job_key, "end_time", Time.now.utc.to_s)
+            finished_jobs.add_job(job_id, class_name)
+          end
+
           running_jobs.remove_job(job_id)
 
           reset
@@ -78,18 +84,34 @@ module Resque
           self
         end
 
-        def failed(exception)
-          redis.hset(job_key, "error", exception_message(exception))
+        def failed(exception, start_time = nil, *args)
+          if start_time.present?
+            record_job_start(start_time, *args)
+          end
+
+          redis.hset(job_key, "error", exception_message(exception)) if redis.exists(job_key)
           redis.incr(total_failed_key)
 
           finish
         end
 
-        def cancel
-          redis.hset(job_key,
-                     "error",
-                     "Unknown - Job failed to signal ending after the configured purge time or "\
-                       "was canceled manually.")
+        def abort
+          running_jobs.remove_job(job_id)
+
+          reset
+        end
+
+        def cancel(caller_message = nil, start_time = nil, *args)
+          if start_time.present?
+            record_job_start(start_time, *args)
+          end
+
+          if redis.exists(job_key)
+            redis.hset(job_key,
+                       "error",
+                       "Unknown - Job failed to signal ending after the configured purge time or was canceled manually.#{caller_message}")
+          end
+
           redis.incr(total_failed_key)
 
           finish
@@ -111,7 +133,7 @@ module Resque
 
         def purge
           # To keep the counts honest...
-          cancel unless finished?
+          abort unless finished?
 
           remove_from_job_lists
 
@@ -136,8 +158,8 @@ module Resque
           linear_jobs.remove_job(job_id)
         end
 
-        def record_job_start(*args)
-          redis.hset(job_key, "start_time", Time.now.utc.to_s)
+        def record_job_start(start_time, *args)
+          redis.hset(job_key, "start_time", start_time)
           redis.hset(job_key, "args", encode_args(*args))
 
           reset

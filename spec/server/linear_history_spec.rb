@@ -19,6 +19,7 @@ RSpec.describe "linear_history.erb" do
     rand_args = rand_args.sample(rand(3..rand_args.length))
 
     if [true, false].sample
+      # :nocov:
       options_hash                    = {}
       options_hash[Faker::Lorem.word] = Faker::Lorem.sentence
       options_hash[Faker::Lorem.word] = Faker::Lorem.paragraph
@@ -33,6 +34,7 @@ RSpec.describe "linear_history.erb" do
       end
 
       rand_args << options_hash.slice(*options_hash.keys.sample(rand(5..options_hash.keys.length)))
+      # :nocov:
     end
 
     rand_args

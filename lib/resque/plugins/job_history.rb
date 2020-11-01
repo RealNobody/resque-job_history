@@ -51,6 +51,7 @@ module Resque
         end
 
         def around_perform_job_history(*args)
+          start_time           = Time.now
           running_job          = Resque::Plugins::JobHistory::Job.new(active_job_class_name(*args), SecureRandom.uuid)
           self.most_recent_job = running_job
 
@@ -59,12 +60,12 @@ module Resque
 
             yield if block_given?
 
-            running_job.finish
+            running_job.finish(start_time, *args)
           rescue StandardError => exception
-            running_job.failed exception
+            running_job.failed exception, start_time, *args
             raise
           ensure
-            running_job.cancel unless running_job.finished? || running_job.error
+            running_job.cancel(" Job did not signal completion on finish.", start_time, *args) unless running_job.finished? || running_job.error
             self.most_recent_job = nil
           end
         end
@@ -99,18 +100,9 @@ module Resque
 
         private
 
-        def job_class_has_history?(*args)
-          if Object.const_defined?("ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper") &&
-              self >= ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper
-            args[-1]["job_class"].constantize.included_modules.include? Resque::Plugins::JobHistory
-          else
-            true
-          end
-        end
-
         def active_job_class_name(*args)
           if Object.const_defined?("ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper") &&
-              self >= ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper
+              self >= "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper".constantize
             args[-1]["job_class"]
           else
             name
@@ -119,7 +111,7 @@ module Resque
 
         def active_job_args(*args)
           if Object.const_defined?("ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper") &&
-              self >= ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper
+              self >= "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper".constantize
             args[-1]["arguments"]
           else
             args
@@ -144,8 +136,7 @@ module Resque
 end
 
 if Object.const_defined?("ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper")
-  unless ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper.included_modules.
-      include? Resque::Plugins::JobHistory
-    ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper.include Resque::Plugins::JobHistory
+  unless "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper".constantize.included_modules.include? Resque::Plugins::JobHistory
+    "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper".constantize.include Resque::Plugins::JobHistory
   end
 end
