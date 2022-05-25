@@ -73,19 +73,19 @@ RSpec.describe "linear_history.erb" do
     end
   end
 
-  it "should respond to /job history/purge_linear_history" do
-    post "/job%20history/purge_linear_history"
+  it "should respond to /job_history/purge_linear_history" do
+    post "/job_history/purge_linear_history"
 
     expect(last_response).to be_redirect
-    expect(last_response.header["Location"]).to match(/job history$/)
+    expect(last_response.header["Location"]).to match(/job_history$/)
 
-    get "/job%20history"
+    get "/job_history"
 
     expect(last_response.body.scan("<tr>").count).to eq 3
   end
 
-  it "should respond to /job history/linear_history" do
-    get "/job%20history/linear_history"
+  it "should respond to /job_history/linear_history" do
+    get "/job_history/linear_history"
 
     expect(last_response).to be_ok
 
@@ -94,7 +94,7 @@ RSpec.describe "linear_history.erb" do
     expect(last_response.body).to match %r{Job History(\n *)?</a>}
 
     expect(last_response.body).
-        to match %r{action="/job history/purge_linear_history"}
+        to match %r{action="/job_history/purge_linear_history"}
 
     expect(last_response.body).to be_include "Class</th>"
     expect(last_response.body).to be_include "Started</th>"
@@ -102,12 +102,12 @@ RSpec.describe "linear_history.erb" do
     expect(last_response.body).to be_include "Parameters</th>"
     expect(last_response.body).to be_include "Error</th>"
 
-    expect(last_response.body).to be_include("job history\"")
+    expect(last_response.body).to be_include("job_history\"")
     expect(last_response.body.scan("<tr").count).to eq 11
   end
 
   it "styles a job if it fails" do
-    get "/job%20history/linear_history"
+    get "/job_history/linear_history"
 
     expect(last_response).to be_ok
 
@@ -115,7 +115,7 @@ RSpec.describe "linear_history.erb" do
   end
 
   it "shows the parameters for the jobs" do
-    get "/job%20history/linear_history"
+    get "/job_history/linear_history"
 
     expect(last_response).to be_ok
 
@@ -123,7 +123,7 @@ RSpec.describe "linear_history.erb" do
   end
 
   it "includes the error message" do
-    get "/job%20history/linear_history"
+    get "/job_history/linear_history"
 
     expect(last_response).to be_ok
 
@@ -131,10 +131,10 @@ RSpec.describe "linear_history.erb" do
   end
 
   it "allows a search of the linear history" do
-    get "/job%20history/linear_history"
+    get "/job_history/linear_history"
 
     expect(last_response).to be_ok
 
-    expect(last_response.body).to match(%r{action="/job history/search_linear_history"})
+    expect(last_response.body).to match(%r{action="/job_history/search_linear_history"})
   end
 end

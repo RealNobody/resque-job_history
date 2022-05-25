@@ -51,51 +51,51 @@ RSpec.describe "job_details.erb" do
     job.failed(StandardError.new("Sample Failure"))
   end
 
-  it "should respond to /job history/cancel_job" do
+  it "should respond to /job_history/cancel_job" do
     job.purge
     job.start
 
-    post "/job%20history/cancel_job?class_name=CustomPageSizeJob&job_id=#{job_id}"
+    post "/job_history/cancel_job?class_name=CustomPageSizeJob&job_id=#{job_id}"
 
     expect(last_response).to be_redirect
     expect(last_response.header["Location"]).
-        to match(%r{job history/job_details\?class_name=CustomPageSizeJob&job_id=#{job_id}$})
+        to match(%r{job_history/job_details\?class_name=CustomPageSizeJob&job_id=#{job_id}$})
 
     job.send(:reset)
     expect(job.finished?).to be_truthy
   end
 
-  it "should respond to /job history/delete_job" do
-    post "/job%20history/delete_job?class_name=CustomPageSizeJob&job_id=#{job_id}&job_id=#{job_id}"
+  it "should respond to /job_history/delete_job" do
+    post "/job_history/delete_job?class_name=CustomPageSizeJob&job_id=#{job_id}&job_id=#{job_id}"
 
     expect(last_response).to be_redirect
     expect(last_response.header["Location"]).
-        to match(%r{job history/job_class_details\?class_name=CustomPageSizeJob$})
+        to match(%r{job_history/job_class_details\?class_name=CustomPageSizeJob$})
 
-    get "/job%20history/job_class_details?class_name=CustomPageSizeJob"
+    get "/job_history/job_class_details?class_name=CustomPageSizeJob"
 
     expect(last_response).to be_ok
     expect(last_response.body).not_to include(job_id)
   end
 
-  it "should respond to /job history/retry_job" do
+  it "should respond to /job_history/retry_job" do
     expect(Resque).to receive(:enqueue).with(CustomPageSizeJob, *test_args).and_call_original
 
-    post "/job%20history/retry_job?class_name=CustomPageSizeJob&job_id=#{job_id}&job_id=#{job_id}"
+    post "/job_history/retry_job?class_name=CustomPageSizeJob&job_id=#{job_id}&job_id=#{job_id}"
 
     expect(last_response).to be_redirect
     expect(last_response.header["Location"]).
-        to match(%r{job history/job_class_details\?class_name=CustomPageSizeJob$})
+        to match(%r{job_history/job_class_details\?class_name=CustomPageSizeJob$})
 
-    get "/job%20history/job_class_details?class_name=CustomPageSizeJob"
+    get "/job_history/job_class_details?class_name=CustomPageSizeJob"
 
     expect(last_response).to be_ok
     expect(last_response.body).to include(job_id)
     expect(last_response.body.scan("<tr>").count).to eq 9
   end
 
-  it "should respond to /job history/job_details" do
-    get "/job%20history/job_details?class_name=CustomPageSizeJob&job_id=#{job_id}"
+  it "should respond to /job_history/job_details" do
+    get "/job_history/job_details?class_name=CustomPageSizeJob&job_id=#{job_id}"
 
     expect(last_response).to be_ok
 
@@ -105,23 +105,23 @@ RSpec.describe "job_details.erb" do
     expect(last_response.body).to match %r{CustomPageSizeJob(\n *)?</a>}
 
     expect(last_response.body).
-        not_to match %r{action="/job history/cancel_job\?class_name=CustomPageSizeJob&job_id=#{job_id}"}
+        not_to match %r{action="/job_history/cancel_job\?class_name=CustomPageSizeJob&job_id=#{job_id}"}
     expect(last_response.body).
-        to match %r{action="/job history/delete_job\?class_name=CustomPageSizeJob&job_id=#{job_id}"}
+        to match %r{action="/job_history/delete_job\?class_name=CustomPageSizeJob&job_id=#{job_id}"}
     expect(last_response.body).
-        to match %r{action="/job history/retry_job\?class_name=CustomPageSizeJob&job_id=#{job_id}"}
+        to match %r{action="/job_history/retry_job\?class_name=CustomPageSizeJob&job_id=#{job_id}"}
 
     expect(last_response.body).to match(%r{Started(\n *)</td>})
     expect(last_response.body).to match(%r{Duration(\n *)</td>})
     expect(last_response.body).to match(%r{Params(\n *)</td>})
     expect(last_response.body).to match(%r{Error(\n *)</td>})
 
-    expect(last_response.body).to be_include("job history/job_class_details?class_name=CustomPageSizeJob\"")
-    expect(last_response.body).to be_include("job history\"")
+    expect(last_response.body).to be_include("job_history/job_class_details?class_name=CustomPageSizeJob\"")
+    expect(last_response.body).to be_include("job_history\"")
   end
 
   it "styles a job if it fails" do
-    get "/job%20history/job_details?class_name=CustomPageSizeJob&job_id=#{job_id}"
+    get "/job_history/job_details?class_name=CustomPageSizeJob&job_id=#{job_id}"
 
     expect(last_response).to be_ok
 
@@ -129,7 +129,7 @@ RSpec.describe "job_details.erb" do
   end
 
   it "shows the parameters for the jobs" do
-    get "/job%20history/job_details?class_name=CustomPageSizeJob&job_id=#{job_id}"
+    get "/job_history/job_details?class_name=CustomPageSizeJob&job_id=#{job_id}"
 
     expect(last_response).to be_ok
 
@@ -137,7 +137,7 @@ RSpec.describe "job_details.erb" do
   end
 
   it "includes the error message" do
-    get "/job%20history/job_details?class_name=CustomPageSizeJob&job_id=#{job_id}"
+    get "/job_history/job_details?class_name=CustomPageSizeJob&job_id=#{job_id}"
 
     expect(last_response).to be_ok
 
@@ -148,11 +148,11 @@ RSpec.describe "job_details.erb" do
     job.purge
     job.start
 
-    get "/job%20history/job_details?class_name=CustomPageSizeJob&job_id=#{job_id}"
+    get "/job_history/job_details?class_name=CustomPageSizeJob&job_id=#{job_id}"
 
     expect(last_response).to be_ok
 
     expect(last_response.body).
-        to match %r{action="/job history/cancel_job\?class_name=CustomPageSizeJob&job_id=#{job_id}"}
+        to match %r{action="/job_history/cancel_job\?class_name=CustomPageSizeJob&job_id=#{job_id}"}
   end
 end

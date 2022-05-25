@@ -9,7 +9,7 @@
 
   <% if total_pages > 1 %>
     <div class="job_history_prev_links">
-      <a href="<%= u("job history") %>?<%= { sort:      @sort_by,
+      <a href="<%= u("job_history") %>?<%= { sort:      @sort_by,
                                              page_size: page_size,
                                              page_num:  1,
                                              order:     @sort_order }.to_param %>"
@@ -18,7 +18,7 @@
         &lt;&lt; First
       </a>
 
-      <a href="<%= u("job history") %>?<%= { sort:      @sort_by,
+      <a href="<%= u("job_history") %>?<%= { sort:      @sort_by,
                                              page_size: page_size,
                                              page_num:  [1, page_num - 1].max,
                                              order:     @sort_order }.to_param %>"
@@ -31,7 +31,7 @@
     <div class="job_history_pages">
       <% (first_page..last_page).each do |page_number| %>
         <% if page_number != page_num %>
-          <a href="<%= u("job history") %>?<%= { sort:      @sort_by,
+          <a href="<%= u("job_history") %>?<%= { sort:      @sort_by,
                                                  page_size: page_size,
                                                  page_num:  page_number,
                                                  order:     @sort_order }.to_param %>"
@@ -45,7 +45,7 @@
     </div>
 
     <div class="job_history_next_links">
-      <a href="<%= u("job history") %>?<%= { sort:      @sort_by,
+      <a href="<%= u("job_history") %>?<%= { sort:      @sort_by,
                                              page_size: page_size,
                                              page_num:  [total_pages, page_num + 1].min,
                                              order:     @sort_order }.to_param %>"
@@ -54,7 +54,7 @@
         Next &gt;
       </a>
 
-      <a href="<%= u("job history") %>?<%= { sort:      @sort_by,
+      <a href="<%= u("job_history") %>?<%= { sort:      @sort_by,
                                              page_size: page_size,
                                              page_num:  total_pages,
                                              order:     @sort_order }.to_param %>"

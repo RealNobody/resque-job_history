@@ -9,7 +9,7 @@
 
   <% if total_pages > 1 %>
     <div class="job_history_prev_links">
-      <a href="<%= u("job history/job_class_details") %>?<%=
+      <a href="<%= u("job_history/job_class_details") %>?<%=
         { class_name:                   class_name,
           "#{primary_type}_page_size"   => page_size,
           "#{primary_type}_page_num"    => 1,
@@ -20,7 +20,7 @@
         &lt;&lt; First
       </a>
 
-      <a href="<%= u("job history/job_class_details") %>?<%=
+      <a href="<%= u("job_history/job_class_details") %>?<%=
         { class_name:                   class_name,
           "#{primary_type}_page_size"   => page_size,
           "#{primary_type}_page_num"    => [1, page_num - 1].max,
@@ -35,7 +35,7 @@
     <div class="job_history_pages">
       <% (first_page..last_page).each do |page_number| %>
         <% if page_number != page_num %>
-          <a href="<%= u("job history/job_class_details") %>?<%=
+          <a href="<%= u("job_history/job_class_details") %>?<%=
             { class_name:                   class_name,
               "#{primary_type}_page_size"   => page_size,
               "#{primary_type}_page_num"    => page_number,
@@ -51,7 +51,7 @@
     </div>
 
     <div class="job_history_next_links">
-      <a href="<%= u("job history/job_class_details") %>?<%=
+      <a href="<%= u("job_history/job_class_details") %>?<%=
         { class_name:                   class_name,
           "#{primary_type}_page_size"   => page_size,
           "#{primary_type}_page_num"    => [total_pages, page_num + 1].min,
@@ -62,7 +62,7 @@
         Next &gt;
       </a>
 
-      <a href="<%= u("job history/job_class_details") %>?<%=
+      <a href="<%= u("job_history/job_class_details") %>?<%=
         { class_name:                   class_name,
           "#{primary_type}_page_size"   => page_size,
           "#{primary_type}_page_num"    => total_pages,

@@ -13,14 +13,14 @@
       <tr<%= job_details.succeeded? ? "" : " class=\"job_history_error\"" %>>
         <% if show_class %>
           <td>
-            <a href="<%= u("job history/job_class_details") %>?<%=
+            <a href="<%= u("job_history/job_class_details") %>?<%=
               { class_name: job_details.class_name }.to_param %>">
               <%= job_details.class_name %>
             </a>
           </td>
         <% end %>
         <td>
-          <a href="<%= u("job history/job_details") %>?class_name=<%=
+          <a href="<%= u("job_history/job_details") %>?class_name=<%=
             job_details.class_name %>&job_id=<%= job_details.job_id %>">
             <% if job_details.start_time %>
               <%= time_ago_in_words(job_details.start_time) %> ago
