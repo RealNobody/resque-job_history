@@ -65,27 +65,27 @@ RSpec.describe "job_history.erb" do
     Resque.enqueue(BasicJob, test_args)
   end
 
-  it "should respond to /job history/purge_all" do
-    post "/job%20history/purge_all"
+  it "should respond to /job_history/purge_all" do
+    post "/job_history/purge_all"
 
     expect(last_response).to be_redirect
-    expect(last_response.header["Location"]).to match(/job history$/)
+    expect(last_response.header["Location"]).to match(/job_history$/)
 
-    get "/job%20history"
+    get "/job_history"
 
     expect(last_response).to be_ok
     expect(last_response.body.scan("<tr>").count).to eq 1
   end
 
-  it "should respond to /job history" do
-    get "/job%20history"
+  it "should respond to /job_history" do
+    get "/job_history"
 
     expect(last_response).to be_ok
 
     expect(last_response.body).to be_include("Job Classes")
 
     expect(last_response.body).to match %r{Linear History(\n *)?</a>}
-    expect(last_response.body).to match %r{action="/job history/purge_all"}
+    expect(last_response.body).to match %r{action="/job_history/purge_all"}
 
     expect(last_response.body).to match(/sort=class_name">(\n *)?Class name/)
     expect(last_response.body).to match(/sort=num_running_jobs">(\n *)?Running/)
@@ -108,19 +108,19 @@ RSpec.describe "job_history.erb" do
       Resque.enqueue(job, test_args)
     end
 
-    get "/job%20history"
+    get "/job_history"
 
     expect(last_response).to be_ok
 
-    expect(last_response.body).to match(%r{href="/job history?.*page_num=2})
-    expect(last_response.body).to match(%r{href="/job history?.*page_num=3})
-    expect(last_response.body).not_to match(%r{href="/job history?.*page_num=4})
+    expect(last_response.body).to match(%r{href="/job_history?.*page_num=2})
+    expect(last_response.body).to match(%r{href="/job_history?.*page_num=3})
+    expect(last_response.body).not_to match(%r{href="/job_history?.*page_num=4})
   end
 
   it "styles a job if it fails" do
     expect { Resque.enqueue(FailingJob, test_args) }.to raise_error StandardError
 
-    get "/job%20history"
+    get "/job_history"
 
     expect(last_response).to be_ok
 
@@ -128,10 +128,10 @@ RSpec.describe "job_history.erb" do
   end
 
   it "allows a search of all classes" do
-    get "/job%20history"
+    get "/job_history"
 
     expect(last_response).to be_ok
 
-    expect(last_response.body).to match(%r{action="/job history/search_all"})
+    expect(last_response.body).to match(%r{action="/job_history/search_all"})
   end
 end

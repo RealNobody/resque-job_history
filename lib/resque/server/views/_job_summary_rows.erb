@@ -1,7 +1,7 @@
 <% summary_rows.each do |class_info| %>
   <tr<%= class_info.last_run && !class_info.last_run.succeeded? ? " class=\"job_history_error\"" : "" %>>
     <td>
-      <a href="<%= u("job history") %>/job_class_details?class_name=<%= class_info.class_name %>">
+      <a href="<%= u("job_history") %>/job_class_details?class_name=<%= class_info.class_name %>">
         <%= class_info.class_name %>
       </a>
     </td>

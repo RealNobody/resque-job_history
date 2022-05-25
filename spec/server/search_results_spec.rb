@@ -44,7 +44,7 @@ RSpec.describe "search_results.erb" do
 
       job = Resque::Plugins::JobHistory::JobSearch.new(full_settings)
 
-      post "job%20history/#{search_type}", job.search_settings(true)
+      post "job_history/#{search_type}", job.search_settings(true)
 
       expect(last_response).to be_ok
 
@@ -78,30 +78,30 @@ RSpec.describe "search_results.erb" do
   end
 
   it "shows class results" do
-    post "job%20history/search_all",
+    post "job_history/search_all",
          search_type:      "search_all",
          search_for:       find_regex,
          regex_search:     "true",
          case_insensitive: "true"
 
     expect(last_response.body).
-        to be_include("href=\"/job history/job_class_details?class_name=CustomPageSizeJob\"")
+        to be_include("href=\"/job_history/job_class_details?class_name=CustomPageSizeJob\"")
   end
 
   it "shows job results" do
-    post "job%20history/search_all",
+    post "job_history/search_all",
          search_type:      "search_all",
          search_for:       find_regex,
          regex_search:     "true",
          case_insensitive: "true"
 
     expect(last_response.body).
-        to be_include("href=\"/job history/job_details?class_name=CustomPageSizeJob&job_id" \
+        to be_include("href=\"/job_history/job_details?class_name=CustomPageSizeJob&job_id" \
                               "=#{jobs[0][1].job_id}\"")
   end
 
   it "shows no reults" do
-    post "job%20history/search_all",
+    post "job_history/search_all",
          search_type:      "search_all",
          search_for:       "You won't ever find this.",
          regex_search:     "true",

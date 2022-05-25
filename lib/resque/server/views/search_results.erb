@@ -4,7 +4,7 @@
 
 <div>
   <div class="job_history_linear_history_div">
-    <a href="<%= u("job history") %>">
+    <a href="<%= u("job_history") %>">
       Job History
     </a>
   </div>
@@ -57,7 +57,7 @@
 <% end %>
 
 <% if @job_search.more_records? %>
-  <form id="continue_search" method="POST" action="<%= u("job history/#{@job_search.search_type}") %>">
+  <form id="continue_search" method="POST" action="<%= u("job_history/#{@job_search.search_type}") %>">
     <% @job_search.search_settings(true).each do |setting_name, setting_value| %>
       <input type="hidden" name="<%= setting_name %>" value="<%= setting_value %>"/>
     <% end %>

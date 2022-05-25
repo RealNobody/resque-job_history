@@ -1,5 +1,5 @@
 <div id="job_history_search_div">
-  <form method="POST" action="<%= u("job history/#{job_search.search_type}") %>">
+  <form method="POST" action="<%= u("job_history/#{job_search.search_type}") %>">
     <% job_search.retry_search_settings(false).each do |setting_name, setting_value| %>
       <input type="hidden" name="<%= setting_name %>" value="<%= setting_value %>"/>
     <% end %>
