@@ -29,7 +29,7 @@ module Resque
         end
 
         def blank?
-          !redis.exists job_key
+          !redis.exists? job_key
         end
 
         def succeeded?
